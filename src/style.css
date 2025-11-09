@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-gray-50 text-gray-800;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}

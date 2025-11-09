@@ -1,0 +1,9 @@
+- 各種ドキュメントをコンテキストに含めて
+    - @./docs/01_requirements.md
+    - @./docs/02_basic_design.md
+    - @./docs/03_wireframes.md
+    - @./docs/04_api_spec.md
+    - @./docs/05_technical_specification.md
+- 今後の作業の進捗管理のため、@./TODO.mdをタスク完了の都度、更新してください。
+    - 1.1 などの細かいリスト構造は変えずにチェックを入れる。補足があればサブリストに追記する。
+    - ある程度の作業が完了したら各種ドキュメントを更新する

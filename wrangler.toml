@@ -1,0 +1,13 @@
+name = "national-flag-game"
+compatibility_date = "2025-11-08"
+
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB" # Honoからアクセスする際のバインディング名
+database_name = "national-flag-game-db"
+database_id = "729c0934-a3e2-4f27-a5c2-e30d4cd606c6"
+preview_database_id = "local-db" # ローカル開発用のプレビューDB ID
+
+[vars]
+# 環境変数をここに定義できる
