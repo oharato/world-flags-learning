@@ -29,18 +29,18 @@ export function formatDateTime(isoString: string): string {
     const second = parts.find((p) => p.type === 'second')?.value;
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
   } else {
-    // 英語の場合: タイムゾーンは標準時 (UTC) でタイムゾーン表示あり
-    options.timeZone = 'UTC';
-    options.timeZoneName = 'short'; // タイムゾーン表示あり
+    // 英語の場合: タイムゾーンは日本時間 (JST)
+    options.timeZone = 'Asia/Tokyo';
     const formatter = new Intl.DateTimeFormat('en-US', options);
-    const formatted = formatter.format(date);
+    const parts = formatter.formatToParts(date);
+    const year = parts.find((p) => p.type === 'year')?.value;
+    const month = parts.find((p) => p.type === 'month')?.value;
+    const day = parts.find((p) => p.type === 'day')?.value;
+    const hour = parts.find((p) => p.type === 'hour')?.value;
+    const minute = parts.find((p) => p.type === 'minute')?.value;
+    const second = parts.find((p) => p.type === 'second')?.value;
 
-    // "MM/DD/YYYY, HH:mm:ss UTC" のような形式になるので、YYYY-MM-DD HH:mm:ss UTC に整形
-    const [datePart, timeAndTzPart] = formatted.split(', ');
-    if (!datePart) return formatted; // フォールバック: 元の形式を返す
-    const [month, day, year] = datePart.split('/');
-
-    // timeAndTzPart は "HH:mm:ss UTC" の形式なので、そのまま使用
-    return `${year}-${month}-${day} ${timeAndTzPart}`;
+    // YYYY-MM-DD HH:mm:ss JST の形式で返す
+    return `${year}-${month}-${day} ${hour}:${minute}:${second} JST`;
   }
 }

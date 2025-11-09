@@ -35,7 +35,7 @@ app.get('/api/ranking', async (c) => {
 
     if (type === 'daily') {
       query = `SELECT nickname, score, created_at FROM ranking_daily 
-               WHERE region = ? AND format = ? AND date = date('now', 'localtime')
+               WHERE region = ? AND format = ? AND date = date('now', '+9 hours')
                ORDER BY score DESC, created_at ASC LIMIT ?`;
       params = [region, format, limit];
     } else {
@@ -90,14 +90,14 @@ app.post('/api/ranking', zValidator('json', scoreSchema), async (c) => {
 
   try {
     const now = new Date().toISOString();
-    const today = now.split('T')[0];
 
     // 日次ランキングに登録（各挑戦ごとに記録）
+    // date('now', '+9 hours')でJST（日本標準時）の日付を使用
     await c.env.DB.prepare(
       `INSERT INTO ranking_daily (nickname, score, region, format, date, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, date('now', '+9 hours'), ?)`
     )
-      .bind(sanitizedNickname, score, region, format, today, now)
+      .bind(sanitizedNickname, score, region, format, now)
       .run();
 
     // 全期間ランキングの処理
@@ -133,9 +133,9 @@ app.post('/api/ranking', zValidator('json', scoreSchema), async (c) => {
     // 登録後の日次ランキング順位を取得
     const rankResult = await c.env.DB.prepare(
       `SELECT COUNT(*) as rank FROM ranking_daily 
-       WHERE region = ? AND format = ? AND date = ? AND (score > ? OR (score = ? AND created_at < ?))`
+       WHERE region = ? AND format = ? AND date = date('now', '+9 hours') AND (score > ? OR (score = ? AND created_at < ?))`
     )
-      .bind(region, format, today, score, score, now)
+      .bind(region, format, score, score, now)
       .first<RankRow>();
 
     const rank = (rankResult?.rank ?? 0) + 1;

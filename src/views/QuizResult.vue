@@ -68,6 +68,12 @@ const getRegionLabel = (region: string) => {
   <div class="container mx-auto p-4 max-w-3xl text-center">
     <h2 class="text-4xl font-bold my-8">{{ t.quizResult.title }}</h2>
 
+    <!-- エラーメッセージ表示 -->
+    <div v-if="rankingStore.error" class="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg text-red-700">
+      <p class="font-semibold">ランキング登録エラー</p>
+      <p class="text-sm">{{ rankingStore.error }}</p>
+    </div>
+
     <!-- クイズ設定表示 -->
     <div class="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-lg">
       <h3 class="text-xl font-bold mb-3">{{ t.quizResult.settings }}</h3>
