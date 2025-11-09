@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { setActivePinia, createPinia } from 'pinia';
+import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCountriesStore } from '../countries';
 
 globalThis.fetch = vi.fn() as any;
@@ -12,7 +12,7 @@ describe('Countries Store', () => {
 
   it('初期状態が正しく設定されている', () => {
     const store = useCountriesStore();
-    
+
     expect(store.countries).toEqual([]);
     expect(store.loading).toBe(false);
     expect(store.error).toBe(null);
@@ -21,8 +21,26 @@ describe('Countries Store', () => {
 
   it('fetchCountries で日本語の国データを正常に取得できる', async () => {
     const mockCountries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
-      { id: 'us', name: 'アメリカ合衆国', capital: 'ワシントンD.C.', continent: '北アメリカ', flag_image_url: '/flags/us.svg', map_image_url: '/maps/us.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'us',
+        name: 'アメリカ合衆国',
+        capital: 'ワシントンD.C.',
+        continent: '北アメリカ',
+        flag_image_url: '/flags/us.svg',
+        map_image_url: '/maps/us.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     (globalThis.fetch as any).mockResolvedValueOnce({
@@ -41,7 +59,16 @@ describe('Countries Store', () => {
 
   it('fetchCountries で英語の国データを正常に取得できる', async () => {
     const mockCountries = [
-      { id: 'jp', name: 'Japan', capital: 'Tokyo', continent: 'Asia', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: 'Description', summary: 'Summary' },
+      {
+        id: 'jp',
+        name: 'Japan',
+        capital: 'Tokyo',
+        continent: 'Asia',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: 'Description',
+        summary: 'Summary',
+      },
     ];
 
     (globalThis.fetch as any).mockResolvedValueOnce({
@@ -82,7 +109,16 @@ describe('Countries Store', () => {
   it('既にデータがある場合、forceReload=false では再取得しない', async () => {
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     await store.fetchCountries(false);
@@ -92,7 +128,16 @@ describe('Countries Store', () => {
 
   it('forceReload=true の場合、既にデータがあっても再取得する', async () => {
     const mockCountries = [
-      { id: 'us', name: 'アメリカ合衆国', capital: 'ワシントンD.C.', continent: '北アメリカ', flag_image_url: '/flags/us.svg', map_image_url: '/maps/us.svg', description: '説明', summary: '概要' },
+      {
+        id: 'us',
+        name: 'アメリカ合衆国',
+        capital: 'ワシントンD.C.',
+        continent: '北アメリカ',
+        flag_image_url: '/flags/us.svg',
+        map_image_url: '/maps/us.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     (globalThis.fetch as any).mockResolvedValueOnce({
@@ -102,7 +147,16 @@ describe('Countries Store', () => {
 
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     await store.fetchCountries(true);
@@ -113,7 +167,16 @@ describe('Countries Store', () => {
 
   it('setLanguage で言語を変更すると、データが再取得される', async () => {
     const mockCountries = [
-      { id: 'jp', name: 'Japan', capital: 'Tokyo', continent: 'Asia', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: 'Description', summary: 'Summary' },
+      {
+        id: 'jp',
+        name: 'Japan',
+        capital: 'Tokyo',
+        continent: 'Asia',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: 'Description',
+        summary: 'Summary',
+      },
     ];
 
     (globalThis.fetch as any).mockResolvedValueOnce({
@@ -142,8 +205,26 @@ describe('Countries Store', () => {
   it('getCountryById で指定したIDの国を取得できる', () => {
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
-      { id: 'us', name: 'アメリカ合衆国', capital: 'ワシントンD.C.', continent: '北アメリカ', flag_image_url: '/flags/us.svg', map_image_url: '/maps/us.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'us',
+        name: 'アメリカ合衆国',
+        capital: 'ワシントンD.C.',
+        continent: '北アメリカ',
+        flag_image_url: '/flags/us.svg',
+        map_image_url: '/maps/us.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     const country = store.getCountryById('jp');
@@ -153,7 +234,16 @@ describe('Countries Store', () => {
   it('getCountryById で存在しないIDを指定するとundefinedが返る', () => {
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     const country = store.getCountryById('invalid');
@@ -163,10 +253,46 @@ describe('Countries Store', () => {
   it('getRandomCountries で指定した数のランダムな国を取得できる', () => {
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
-      { id: 'us', name: 'アメリカ合衆国', capital: 'ワシントンD.C.', continent: '北アメリカ', flag_image_url: '/flags/us.svg', map_image_url: '/maps/us.svg', description: '説明', summary: '概要' },
-      { id: 'uk', name: 'イギリス', capital: 'ロンドン', continent: 'ヨーロッパ', flag_image_url: '/flags/uk.svg', map_image_url: '/maps/uk.svg', description: '説明', summary: '概要' },
-      { id: 'fr', name: 'フランス', capital: 'パリ', continent: 'ヨーロッパ', flag_image_url: '/flags/fr.svg', map_image_url: '/maps/fr.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'us',
+        name: 'アメリカ合衆国',
+        capital: 'ワシントンD.C.',
+        continent: '北アメリカ',
+        flag_image_url: '/flags/us.svg',
+        map_image_url: '/maps/us.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'uk',
+        name: 'イギリス',
+        capital: 'ロンドン',
+        continent: 'ヨーロッパ',
+        flag_image_url: '/flags/uk.svg',
+        map_image_url: '/maps/uk.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'fr',
+        name: 'フランス',
+        capital: 'パリ',
+        continent: 'ヨーロッパ',
+        flag_image_url: '/flags/fr.svg',
+        map_image_url: '/maps/fr.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     const randomCountries = store.getRandomCountries(2);
@@ -176,19 +302,55 @@ describe('Countries Store', () => {
   it('getRandomCountries で excludeId を指定すると、その国が除外される', () => {
     const store = useCountriesStore();
     store.countries = [
-      { id: 'jp', name: '日本', capital: '東京', continent: 'アジア', flag_image_url: '/flags/jp.svg', map_image_url: '/maps/jp.svg', description: '説明', summary: '概要' },
-      { id: 'us', name: 'アメリカ合衆国', capital: 'ワシントンD.C.', continent: '北アメリカ', flag_image_url: '/flags/us.svg', map_image_url: '/maps/us.svg', description: '説明', summary: '概要' },
-      { id: 'uk', name: 'イギリス', capital: 'ロンドン', continent: 'ヨーロッパ', flag_image_url: '/flags/uk.svg', map_image_url: '/maps/uk.svg', description: '説明', summary: '概要' },
+      {
+        id: 'jp',
+        name: '日本',
+        capital: '東京',
+        continent: 'アジア',
+        flag_image_url: '/flags/jp.svg',
+        map_image_url: '/maps/jp.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'us',
+        name: 'アメリカ合衆国',
+        capital: 'ワシントンD.C.',
+        continent: '北アメリカ',
+        flag_image_url: '/flags/us.svg',
+        map_image_url: '/maps/us.svg',
+        description: '説明',
+        summary: '概要',
+      },
+      {
+        id: 'uk',
+        name: 'イギリス',
+        capital: 'ロンドン',
+        continent: 'ヨーロッパ',
+        flag_image_url: '/flags/uk.svg',
+        map_image_url: '/maps/uk.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     const randomCountries = store.getRandomCountries(3, 'jp');
-    expect(randomCountries.every(c => c.id !== 'jp')).toBe(true);
+    expect(randomCountries.every((c) => c.id !== 'jp')).toBe(true);
     expect(randomCountries.length).toBe(2); // 除外後は2つ
   });
 
   it('複数の首都を持つ国のデータも正しく扱える', async () => {
     const mockCountries = [
-      { id: 'za', name: '南アフリカ', capital: ['プレトリア', 'ケープタウン', 'ブルームフォンテーン'], continent: 'アフリカ', flag_image_url: '/flags/za.svg', map_image_url: '/maps/za.svg', description: '説明', summary: '概要' },
+      {
+        id: 'za',
+        name: '南アフリカ',
+        capital: ['プレトリア', 'ケープタウン', 'ブルームフォンテーン'],
+        continent: 'アフリカ',
+        flag_image_url: '/flags/za.svg',
+        map_image_url: '/maps/za.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
 
     (globalThis.fetch as any).mockResolvedValueOnce({

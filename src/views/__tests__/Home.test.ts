@@ -1,16 +1,16 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { createRouter, createMemoryHistory } from 'vue-router';
-import Home from '../Home.vue';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { useCountriesStore } from '../../store/countries';
+import Home from '../Home.vue';
 
 describe('Home.vue', () => {
   let router: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
-    
+
     router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -48,7 +48,7 @@ describe('Home.vue', () => {
 
     const select = wrapper.find('select');
     expect(select.exists()).toBe(true);
-    
+
     const options = select.findAll('option');
     expect(options).toHaveLength(2);
     expect(options[0]?.text()).toBe('日本語');
@@ -75,9 +75,9 @@ describe('Home.vue', () => {
 
     const countriesStore = useCountriesStore();
     const select = wrapper.find('select');
-    
+
     await select.setValue('en');
-    
+
     expect(countriesStore.currentLanguage).toBe('en');
   });
 
@@ -89,9 +89,9 @@ describe('Home.vue', () => {
     });
 
     await router.isReady();
-    
+
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
-    const quizLink = links.find(link => link.props('to') === '/quiz');
+    const quizLink = links.find((link) => link.props('to') === '/quiz');
     expect(quizLink).toBeDefined();
   });
 
@@ -103,9 +103,9 @@ describe('Home.vue', () => {
     });
 
     await router.isReady();
-    
+
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
-    const studyLink = links.find(link => link.props('to') === '/study');
+    const studyLink = links.find((link) => link.props('to') === '/study');
     expect(studyLink).toBeDefined();
   });
 
@@ -117,9 +117,9 @@ describe('Home.vue', () => {
     });
 
     await router.isReady();
-    
+
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
-    const rankingLink = links.find(link => link.props('to') === '/ranking');
+    const rankingLink = links.find((link) => link.props('to') === '/ranking');
     expect(rankingLink).toBeDefined();
   });
 
@@ -131,14 +131,12 @@ describe('Home.vue', () => {
     });
 
     await router.isReady();
-    
+
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
-    const navLinks = links.filter(link => 
-      link.props('to') === '/quiz' || 
-      link.props('to') === '/study' || 
-      link.props('to') === '/ranking'
+    const navLinks = links.filter(
+      (link) => link.props('to') === '/quiz' || link.props('to') === '/study' || link.props('to') === '/ranking'
     );
-    
+
     expect(navLinks).toHaveLength(3);
   });
 });

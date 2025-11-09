@@ -1,17 +1,17 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { mount, flushPromises } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 import { createPinia, setActivePinia } from 'pinia';
-import { createRouter, createMemoryHistory } from 'vue-router';
-import Study from '../Study.vue';
-import { useCountriesStore } from '../../store/countries';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createMemoryHistory, createRouter } from 'vue-router';
 import { mockCountries } from '../../__tests__/fixtures/countries';
+import { useCountriesStore } from '../../store/countries';
+import Study from '../Study.vue';
 
 describe('Study.vue', () => {
   let router: any;
 
   beforeEach(() => {
     setActivePinia(createPinia());
-    
+
     router = createRouter({
       history: createMemoryHistory(),
       routes: [
@@ -62,12 +62,12 @@ describe('Study.vue', () => {
 
     // 初期状態でisFlippedがfalseであることを確認
     expect((wrapper.vm as any).isFlipped).toBe(false);
-    
+
     // カード（表面）をクリック
     const cardFront = wrapper.find('.backface-hidden.bg-gray-100');
     await cardFront.trigger('click');
     await wrapper.vm.$nextTick();
-    
+
     // isFlippedがtrueになることを確認
     expect((wrapper.vm as any).isFlipped).toBe(true);
   });
@@ -82,13 +82,13 @@ describe('Study.vue', () => {
     // 初期インデックスは0
     expect((wrapper.vm as any).currentIndex).toBe(0);
 
-    const nextButton = wrapper.findAll('button').find(btn => btn.text().includes('次へ'));
+    const nextButton = wrapper.findAll('button').find((btn) => btn.text().includes('次へ'));
     expect(nextButton).toBeDefined();
-    
+
     if (nextButton) {
       await nextButton.trigger('click');
       await wrapper.vm.$nextTick();
-      
+
       // currentIndexが1になることを確認
       expect((wrapper.vm as any).currentIndex).toBe(1);
       // カードが表面に戻ることを確認
@@ -104,19 +104,19 @@ describe('Study.vue', () => {
     });
 
     // まず次へ進む
-    const nextButton = wrapper.findAll('button').find(btn => btn.text().includes('次へ'));
+    const nextButton = wrapper.findAll('button').find((btn) => btn.text().includes('次へ'));
     if (nextButton) {
       await nextButton.trigger('click');
       await wrapper.vm.$nextTick();
       expect((wrapper.vm as any).currentIndex).toBe(1);
     }
-    
+
     // 前へ戻る
-    const prevButton = wrapper.findAll('button').find(btn => btn.text().includes('前へ'));
+    const prevButton = wrapper.findAll('button').find((btn) => btn.text().includes('前へ'));
     if (prevButton) {
       await prevButton.trigger('click');
       await wrapper.vm.$nextTick();
-      
+
       // インデックスが0に戻ることを確認
       expect((wrapper.vm as any).currentIndex).toBe(0);
       // カードが表面に戻ることを確認
@@ -131,8 +131,8 @@ describe('Study.vue', () => {
       },
     });
 
-    const nextButton = wrapper.findAll('button').find(btn => btn.text().includes('次へ'));
-    
+    const nextButton = wrapper.findAll('button').find((btn) => btn.text().includes('次へ'));
+
     if (nextButton) {
       // 3回「次へ」を押して最後の国の次へ
       await nextButton.trigger('click');
@@ -141,7 +141,7 @@ describe('Study.vue', () => {
       await wrapper.vm.$nextTick();
       await nextButton.trigger('click');
       await wrapper.vm.$nextTick();
-      
+
       // インデックスが0に戻ることを確認（ループ）
       expect((wrapper.vm as any).currentIndex).toBe(0);
     }
@@ -157,11 +157,11 @@ describe('Study.vue', () => {
     // 初期状態でインデックスは0
     expect((wrapper.vm as any).currentIndex).toBe(0);
 
-    const prevButton = wrapper.findAll('button').find(btn => btn.text().includes('前へ'));
+    const prevButton = wrapper.findAll('button').find((btn) => btn.text().includes('前へ'));
     if (prevButton) {
       await prevButton.trigger('click');
       await wrapper.vm.$nextTick();
-      
+
       // インデックスが最後（2）になることを確認
       expect((wrapper.vm as any).currentIndex).toBe(2);
     }
@@ -186,7 +186,7 @@ describe('Study.vue', () => {
 
     const select = wrapper.find('#studyRegion');
     expect(select.exists()).toBe(true);
-    
+
     const options = select.findAll('option');
     expect(options[0]?.text()).toBe('全世界');
   });
@@ -201,7 +201,7 @@ describe('Study.vue', () => {
     const select = wrapper.find('#studyRegion');
     await select.setValue('Asia');
     await wrapper.vm.$nextTick();
-    
+
     // フィルタリングされた国の数を確認
     const filteredCountries = (wrapper.vm as any).filteredCountries;
     expect(filteredCountries.length).toBe(1);
@@ -219,15 +219,15 @@ describe('Study.vue', () => {
     const cardFront = wrapper.find('.backface-hidden.bg-gray-100');
     await cardFront.trigger('click');
     await wrapper.vm.$nextTick();
-    
+
     // isFlippedがtrueになることを確認
     expect((wrapper.vm as any).isFlipped).toBe(true);
-    
+
     // 地域を変更
     const select = wrapper.find('#studyRegion');
     await select.setValue('Europe');
     await wrapper.vm.$nextTick();
-    
+
     // isFlippedがfalseに戻ることを確認
     expect((wrapper.vm as any).isFlipped).toBe(false);
   });
@@ -241,19 +241,19 @@ describe('Study.vue', () => {
 
     // 初期状態でisFlippedがfalseであることを確認
     expect((wrapper.vm as any).isFlipped).toBe(false);
-    
+
     // カードをクリックしてフリップ
     const cardFront = wrapper.find('.backface-hidden.bg-gray-100');
     await cardFront.trigger('click');
     await wrapper.vm.$nextTick();
-    
+
     // isFlippedがtrueになることを確認
     expect((wrapper.vm as any).isFlipped).toBe(true);
-    
+
     // もう一度クリック
     await cardFront.trigger('click');
     await wrapper.vm.$nextTick();
-    
+
     // isFlippedがfalseに戻ることを確認
     expect((wrapper.vm as any).isFlipped).toBe(false);
   });
@@ -261,7 +261,16 @@ describe('Study.vue', () => {
   it('複数の首都を持つ国の場合、最初の首都が表示される', async () => {
     const countriesStore = useCountriesStore();
     countriesStore.countries = [
-      { id: 'za', name: '南アフリカ', capital: ['プレトリア', 'ケープタウン', 'ブルームフォンテーン'], continent: 'Africa', flag_image_url: '/flags/za.svg', map_image_url: '/maps/za.svg', description: '説明', summary: '概要' },
+      {
+        id: 'za',
+        name: '南アフリカ',
+        capital: ['プレトリア', 'ケープタウン', 'ブルームフォンテーン'],
+        continent: 'Africa',
+        flag_image_url: '/flags/za.svg',
+        map_image_url: '/maps/za.svg',
+        description: '説明',
+        summary: '概要',
+      },
     ];
     countriesStore.loading = false;
 
@@ -276,7 +285,7 @@ describe('Study.vue', () => {
     const currentCountry = (wrapper.vm as any).currentCountry;
     expect(currentCountry).toBeDefined();
     expect(currentCountry?.name).toBe('南アフリカ');
-    
+
     if (Array.isArray(currentCountry?.capital)) {
       expect(currentCountry.capital[0]).toBe('プレトリア');
     }
@@ -327,15 +336,15 @@ describe('Study.vue', () => {
     expect(filteredCountries.length).toBe(0);
   });
 
-    it('国旗一覧が表示される', async () => {
+  it('国旗一覧が表示される', async () => {
     const wrapper = mount(Study, {
       global: {
         plugins: [router],
       },
     });
-    
+
     await wrapper.vm.$nextTick();
-    
+
     // filteredCountriesの数を確認
     const filteredCountries = (wrapper.vm as any).filteredCountries;
     expect(filteredCountries.length).toBe(3);
@@ -352,7 +361,7 @@ describe('Study.vue', () => {
     expect((wrapper.vm as any).currentIndex).toBe(0);
 
     // 国旗一覧のボタンを取得
-    const flagButtons = wrapper.findAll('button').filter(btn => {
+    const flagButtons = wrapper.findAll('button').filter((btn) => {
       const img = btn.find('img');
       return img.exists() && img.attributes('alt')?.includes('の国旗');
     });
@@ -361,10 +370,10 @@ describe('Study.vue', () => {
     if (flagButtons[2]) {
       await flagButtons[2].trigger('click');
       await wrapper.vm.$nextTick();
-      
+
       // currentIndexが2になることを確認
       expect((wrapper.vm as any).currentIndex).toBe(2);
-      
+
       // カードが表面に戻ることを確認
       expect((wrapper.vm as any).isFlipped).toBe(false);
     }
@@ -417,8 +426,6 @@ describe('Study.vue', () => {
     // quizModeが変更されたことを確認
     expect((wrapper.vm as any).quizMode).toBe('name-to-flag');
   });
-
-
 
   it('国旗→国名モードでカードを裏返すと国名と詳細情報が表示される', async () => {
     const wrapper = mount(Study, {

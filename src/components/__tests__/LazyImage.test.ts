@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import LazyImage from '../LazyImage.vue';
 
 describe('LazyImage.vue', () => {
@@ -10,16 +10,19 @@ describe('LazyImage.vue', () => {
   beforeEach(() => {
     observeSpy = vi.fn();
     unobserveSpy = vi.fn();
-    
+
     // IntersectionObserver をモック
-    vi.stubGlobal('IntersectionObserver', class IntersectionObserver {
-      constructor(callback: IntersectionObserverCallback) {
-        intersectionObserverCallback = callback;
-      }
-      observe = observeSpy;
-      unobserve = unobserveSpy;
-      disconnect = vi.fn();
-    } as any);
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class IntersectionObserver {
+        constructor(callback: IntersectionObserverCallback) {
+          intersectionObserverCallback = callback;
+        }
+        observe = observeSpy;
+        unobserve = unobserveSpy;
+        disconnect = vi.fn();
+      } as any
+    );
   });
 
   afterEach(() => {
@@ -31,8 +34,8 @@ describe('LazyImage.vue', () => {
     const wrapper = mount(LazyImage, {
       props: {
         src: '/test-image.png',
-        alt: 'Test Image'
-      }
+        alt: 'Test Image',
+      },
     });
 
     expect(wrapper.find('img').exists()).toBe(true);
@@ -43,8 +46,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: false
-      }
+        eager: false,
+      },
     });
 
     const img = wrapper.find('img');
@@ -56,8 +59,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: true
-      }
+        eager: true,
+      },
     });
 
     const img = wrapper.find('img');
@@ -68,8 +71,8 @@ describe('LazyImage.vue', () => {
     const wrapper = mount(LazyImage, {
       props: {
         src: '/test-image.png',
-        alt: 'Test Alt Text'
-      }
+        alt: 'Test Alt Text',
+      },
     });
 
     const img = wrapper.find('img');
@@ -81,8 +84,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        class: 'custom-class'
-      }
+        class: 'custom-class',
+      },
     });
 
     const img = wrapper.find('img');
@@ -94,11 +97,11 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: false
-      }
+        eager: false,
+      },
     });
 
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
     expect(observeSpy).toHaveBeenCalled();
   });
 
@@ -107,8 +110,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: false
-      }
+        eager: false,
+      },
     });
 
     // 初期状態では src がない
@@ -116,18 +119,20 @@ describe('LazyImage.vue', () => {
     expect(img.attributes('src')).toBeUndefined();
 
     // 要素が表示されたことをシミュレート
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await new Promise((resolve) => setTimeout(resolve, 10));
     if (intersectionObserverCallback) {
-      const mockEntry = [{
-        target: img.element,
-        isIntersecting: true,
-        intersectionRatio: 1,
-        boundingClientRect: {} as DOMRectReadOnly,
-        intersectionRect: {} as DOMRectReadOnly,
-        rootBounds: null,
-        time: Date.now()
-      }] as IntersectionObserverEntry[];
-      
+      const mockEntry = [
+        {
+          target: img.element,
+          isIntersecting: true,
+          intersectionRatio: 1,
+          boundingClientRect: {} as DOMRectReadOnly,
+          intersectionRect: {} as DOMRectReadOnly,
+          rootBounds: null,
+          time: Date.now(),
+        },
+      ] as IntersectionObserverEntry[];
+
       intersectionObserverCallback(mockEntry, {} as IntersectionObserver);
     }
     await wrapper.vm.$nextTick();
@@ -142,8 +147,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: true
-      }
+        eager: true,
+      },
     });
 
     const img = wrapper.find('img');
@@ -155,12 +160,12 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: true
-      }
+        eager: true,
+      },
     });
 
     const img = wrapper.find('img');
-    
+
     // load イベントを発火
     await img.trigger('load');
     await wrapper.vm.$nextTick();
@@ -174,22 +179,22 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: false
-      }
+        eager: false,
+      },
     });
 
     await wrapper.vm.$nextTick();
-    await new Promise(resolve => setTimeout(resolve, 10));
-    
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
     // 監視が開始されたことを確認
     expect(observeSpy).toHaveBeenCalled();
-    
+
     // アンマウント前にunobserveをリセット
     unobserveSpy.mockClear();
-    
+
     // アンマウント
     wrapper.unmount();
-    
+
     // unobserve が呼ばれることを期待（imgRef.value が存在する場合）
     // DOMが即座に削除されるため、呼ばれない可能性もある
     // 最低限observeが呼ばれていればOK
@@ -201,8 +206,8 @@ describe('LazyImage.vue', () => {
       props: {
         src: '/test-image.png',
         alt: 'Test Image',
-        eager: true
-      }
+        eager: true,
+      },
     });
 
     expect(observeSpy).not.toHaveBeenCalled();

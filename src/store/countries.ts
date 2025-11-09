@@ -51,13 +51,11 @@ export const useCountriesStore = defineStore('countries', {
   },
   getters: {
     getCountryById: (state) => (id: string) => {
-      return state.countries.find(country => country.id === id);
+      return state.countries.find((country) => country.id === id);
     },
     // クイズ用のランダムな国リストを取得するゲッター
     getRandomCountries: (state) => (count: number, excludeId?: string) => {
-      const filteredCountries = excludeId 
-        ? state.countries.filter(c => c.id !== excludeId)
-        : state.countries;
+      const filteredCountries = excludeId ? state.countries.filter((c) => c.id !== excludeId) : state.countries;
       const shuffled = [...filteredCountries].sort(() => 0.5 - Math.random());
       return shuffled.slice(0, count);
     },

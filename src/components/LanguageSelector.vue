@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { useCountriesStore, type Language } from '../store/countries';
+import { type Language, useCountriesStore } from '../store/countries';
 
 const countriesStore = useCountriesStore();
 const selectedLanguage = ref<Language>(countriesStore.currentLanguage);

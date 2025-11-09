@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useRankingStore, type RankingType, type QuizFormat } from '../store/ranking';
-import RegionSelector from '../components/RegionSelector.vue';
-import QuizFormatSelector from '../components/QuizFormatSelector.vue';
-import LoadingSpinner from '../components/LoadingSpinner.vue';
-import ErrorMessage from '../components/ErrorMessage.vue';
 import { useTranslation } from '../composables/useTranslation';
-import { formatDateTime } from '../utils/formatters';
+import { type QuizFormat, type RankingType, useRankingStore } from '../store/ranking';
 
 const route = useRoute();
 const router = useRouter();
@@ -17,7 +12,9 @@ const { t } = useTranslation();
 // URLパラメータから初期値を取得
 const selectedRegion = ref((route.query.region as string) || rankingStore.currentRegion || 'all');
 const selectedType = ref<RankingType>((route.query.type as RankingType) || rankingStore.currentType || 'daily');
-const selectedFormat = ref<QuizFormat>((route.query.format as QuizFormat) || rankingStore.currentFormat || 'flag-to-name');
+const selectedFormat = ref<QuizFormat>(
+  (route.query.format as QuizFormat) || rankingStore.currentFormat || 'flag-to-name'
+);
 
 onMounted(() => {
   rankingStore.fetchRanking(selectedRegion.value, selectedType.value, selectedFormat.value);
@@ -31,14 +28,14 @@ onUnmounted(() => {
 // 地域、表示タイプ、形式が変わったらランキングを再取得してURLも更新
 watch([selectedRegion, selectedType, selectedFormat], () => {
   rankingStore.fetchRanking(selectedRegion.value, selectedType.value, selectedFormat.value);
-  
+
   router.replace({
     path: '/ranking',
     query: {
       region: selectedRegion.value,
       type: selectedType.value,
-      format: selectedFormat.value
-    }
+      format: selectedFormat.value,
+    },
   });
 });
 </script>

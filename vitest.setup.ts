@@ -1,4 +1,4 @@
-import { beforeEach, afterEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi } from 'vitest';
 
 // IntersectionObserver のグローバルモック
 if (typeof IntersectionObserver === 'undefined') {
@@ -14,9 +14,9 @@ const originalConsoleWarn = console.warn;
 
 const shouldSuppressMessage = (args: any[]): boolean => {
   const message = args.join(' ');
-  return message.includes('AbortError') || 
-         message.includes('The operation was aborted') ||
-         message.includes('DOMException');
+  return (
+    message.includes('AbortError') || message.includes('The operation was aborted') || message.includes('DOMException')
+  );
 };
 
 beforeEach(() => {

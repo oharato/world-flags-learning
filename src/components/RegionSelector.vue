@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useCountriesStore } from '../store/countries';
 import { useTranslation } from '../composables/useTranslation';
+import { useCountriesStore } from '../store/countries';
 
 interface Props {
   modelValue: string;
@@ -25,26 +25,26 @@ const { t } = useTranslation();
 
 // 大陸の正規化マップ
 const normalizeContinentMap: Record<string, string> = {
-  'Africa': 'Africa',
-  'アフリカ': 'Africa',
-  'Asia': 'Asia',
-  'アジア': 'Asia',
-  'Europe': 'Europe',
-  'ヨーロッパ': 'Europe',
+  Africa: 'Africa',
+  アフリカ: 'Africa',
+  Asia: 'Asia',
+  アジア: 'Asia',
+  Europe: 'Europe',
+  ヨーロッパ: 'Europe',
   'North America': 'North America',
-  '北アメリカ': 'North America',
+  北アメリカ: 'North America',
   'South America': 'South America',
-  '南アメリカ': 'South America',
-  'Oceania': 'Oceania',
-  'オセアニア': 'Oceania',
-  'Antarctica': 'Antarctica',
-  '南極': 'Antarctica',
+  南アメリカ: 'South America',
+  Oceania: 'Oceania',
+  オセアニア: 'Oceania',
+  Antarctica: 'Antarctica',
+  南極: 'Antarctica',
 };
 
 // 利用可能な大陸のリスト
-const availableContinents = computed(() => {
+const _availableContinents = computed(() => {
   const continents = new Set<string>();
-  countriesStore.countries.forEach(country => {
+  countriesStore.countries.forEach((country) => {
     if (country.continent && country.continent !== 'N/A') {
       const normalized = normalizeContinentMap[country.continent] || country.continent;
       continents.add(normalized);
@@ -54,25 +54,25 @@ const availableContinents = computed(() => {
 });
 
 // 表示用の大陸名を取得
-const getDisplayContinentName = (continent: string) => {
+const _getDisplayContinentName = (continent: string) => {
   const continentMap: Record<string, string> = {
-    'Africa': t.value.region.africa,
-    'Asia': t.value.region.asia,
-    'Europe': t.value.region.europe,
+    Africa: t.value.region.africa,
+    Asia: t.value.region.asia,
+    Europe: t.value.region.europe,
     'North America': t.value.region.northAmerica,
     'South America': t.value.region.southAmerica,
-    'Oceania': t.value.region.oceania,
-    'all': t.value.region.all,
+    Oceania: t.value.region.oceania,
+    all: t.value.region.all,
   };
   return continentMap[continent] || continent;
 };
 
-const selectedValue = computed({
+const _selectedValue = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
 });
 
-const displayLabel = computed(() => props.label || t.value.quizSetup.region);
+const _displayLabel = computed(() => props.label || t.value.quizSetup.region);
 </script>
 
 <template>

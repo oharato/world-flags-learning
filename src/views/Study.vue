@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useCountriesStore } from '../store/countries';
-import type { Country } from '../store/countries';
-import FlagCard from '../components/FlagCard.vue';
-import CountryDetailCard from '../components/CountryDetailCard.vue';
-import LazyImage from '../components/LazyImage.vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useTranslation } from '../composables/useTranslation';
+import type { Country } from '../store/countries';
+import { useCountriesStore } from '../store/countries';
 
 const countriesStore = useCountriesStore();
 const { t } = useTranslation();
@@ -36,9 +33,9 @@ const handleKeyDown = (event: KeyboardEvent) => {
   }
 };
 
-const availableContinents = computed(() => {
+const _availableContinents = computed(() => {
   const continents = new Set<string>();
-  countriesStore.countries.forEach(country => {
+  countriesStore.countries.forEach((country) => {
     if (country.continent && country.continent !== 'N/A') {
       continents.add(country.continent);
     }
@@ -50,10 +47,10 @@ const filteredCountries = computed<Country[]>(() => {
   if (selectedRegion.value === 'all') {
     return countriesStore.countries;
   }
-  return countriesStore.countries.filter(country => country.continent === selectedRegion.value);
+  return countriesStore.countries.filter((country) => country.continent === selectedRegion.value);
 });
 
-const currentCountry = computed(() => {
+const _currentCountry = computed(() => {
   if (filteredCountries.value.length === 0) {
     return null;
   }
@@ -71,7 +68,7 @@ watch(quizMode, () => {
 
 const nextCountry = () => {
   if (filteredCountries.value.length === 0) return;
-  
+
   if (isFlipped.value) {
     disableTransition.value = true;
     isFlipped.value = false;
@@ -79,7 +76,7 @@ const nextCountry = () => {
       disableTransition.value = false;
     }, 0);
   }
-  
+
   if (currentIndex.value < filteredCountries.value.length - 1) {
     currentIndex.value++;
   } else {
@@ -89,7 +86,7 @@ const nextCountry = () => {
 
 const prevCountry = () => {
   if (filteredCountries.value.length === 0) return;
-  
+
   if (isFlipped.value) {
     disableTransition.value = true;
     isFlipped.value = false;
@@ -97,7 +94,7 @@ const prevCountry = () => {
       disableTransition.value = false;
     }, 0);
   }
-  
+
   if (currentIndex.value > 0) {
     currentIndex.value--;
   } else {
@@ -105,11 +102,11 @@ const prevCountry = () => {
   }
 };
 
-const toggleFlip = () => {
+const _toggleFlip = () => {
   isFlipped.value = !isFlipped.value;
 };
 
-const goToCountry = (index: number) => {
+const _goToCountry = (index: number) => {
   isFlipped.value = false;
   currentIndex.value = index;
 };

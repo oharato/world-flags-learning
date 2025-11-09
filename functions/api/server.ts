@@ -1,5 +1,5 @@
-import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
+import { Hono } from 'hono';
 import { z } from 'zod';
 
 type Bindings = {
@@ -45,7 +45,9 @@ app.get('/api/ranking', async (c) => {
       params = [region, format, limit];
     }
 
-    const result = await c.env.DB.prepare(query).bind(...params).all<RankingRow>();
+    const result = await c.env.DB.prepare(query)
+      .bind(...params)
+      .all<RankingRow>();
     const results = result.results || [];
 
     // rankプロパティを追加
@@ -65,7 +67,8 @@ app.get('/api/ranking', async (c) => {
 
 // POST /api/ranking - スコア登録
 const scoreSchema = z.object({
-  nickname: z.string()
+  nickname: z
+    .string()
     .min(1, 'ニックネームは必須です')
     .max(20, 'ニックネームは20文字以内で入力してください')
     .trim()
@@ -73,10 +76,7 @@ const scoreSchema = z.object({
       (val) => !/[<>]|&lt;|&gt;|<script|javascript:|on\w+=/i.test(val),
       'ニックネームに使用できない文字が含まれています'
     )
-    .refine(
-      (val) => !/[\x00-\x1F\x7F-\x9F]/.test(val),
-      'ニックネームに制御文字を含めることはできません'
-    ),
+    .refine((val) => !/[\x00-\x1F\x7F-\x9F]/.test(val), 'ニックネームに制御文字を含めることはできません'),
   score: z.number().int().min(0).max(1000000, 'スコアが不正です'),
   region: z.string().default('all'),
   format: z.enum(['flag-to-name', 'name-to-flag']).default('flag-to-name'),
@@ -96,20 +96,26 @@ app.post('/api/ranking', zValidator('json', scoreSchema), async (c) => {
     await c.env.DB.prepare(
       `INSERT INTO ranking_daily (nickname, score, region, format, date, created_at) 
        VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(sanitizedNickname, score, region, format, today, now).run();
+    )
+      .bind(sanitizedNickname, score, region, format, today, now)
+      .run();
 
     // 全期間ランキングの処理
     // 1. 現在の全期間ランキングを取得
     const { results: currentTop } = await c.env.DB.prepare(
       `SELECT score FROM ranking_all_time WHERE region = ? AND format = ? ORDER BY score DESC LIMIT 5`
-    ).bind(region, format).all<ScoreRow>();
+    )
+      .bind(region, format)
+      .all<ScoreRow>();
 
     // 2. 5位未満か、5位より高いスコアの場合は登録
     const fifthScore = currentTop[currentTop.length - 1]?.score ?? 0;
     if (currentTop.length < 5 || score > fifthScore) {
       await c.env.DB.prepare(
         `INSERT INTO ranking_all_time (nickname, score, region, format, created_at) VALUES (?, ?, ?, ?, ?)`
-      ).bind(sanitizedNickname, score, region, format, now).run();
+      )
+        .bind(sanitizedNickname, score, region, format, now)
+        .run();
 
       // 3. 上位5件だけを残して古いレコードを削除
       await c.env.DB.prepare(
@@ -119,14 +125,18 @@ app.post('/api/ranking', zValidator('json', scoreSchema), async (c) => {
            WHERE region = ? AND format = ? 
            ORDER BY score DESC, created_at ASC LIMIT 5
          )`
-      ).bind(region, format, region, format).run();
+      )
+        .bind(region, format, region, format)
+        .run();
     }
 
     // 登録後の日次ランキング順位を取得
     const rankResult = await c.env.DB.prepare(
       `SELECT COUNT(*) as rank FROM ranking_daily 
        WHERE region = ? AND format = ? AND date = ? AND (score > ? OR (score = ? AND created_at < ?))`
-    ).bind(region, format, today, score, score, now).first<RankRow>();
+    )
+      .bind(region, format, today, score, score, now)
+      .first<RankRow>();
 
     const rank = (rankResult?.rank ?? 0) + 1;
 
@@ -146,6 +156,5 @@ app.post('/api/ranking', zValidator('json', scoreSchema), async (c) => {
     return c.json({ error: 'スコアの登録に失敗しました。', details: e.message }, 500);
   }
 });
-
 
 export default app;

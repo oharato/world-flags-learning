@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuizStore, type QuizFormat, type QuizRegion } from '../store/quiz';
-import { useCountriesStore } from '../store/countries';
-import RegionSelector from '../components/RegionSelector.vue';
-import QuizFormatSelector from '../components/QuizFormatSelector.vue';
-import AppButton from '../components/AppButton.vue';
 import { useTranslation } from '../composables/useTranslation';
+import { useCountriesStore } from '../store/countries';
+import { type QuizFormat, type QuizRegion, useQuizStore } from '../store/quiz';
 
 const router = useRouter();
 const quizStore = useQuizStore();
@@ -43,39 +40,39 @@ const handleKeydown = (e: KeyboardEvent) => {
 // ニックネームのバリデーション
 const validateNickname = (name: string): { valid: boolean; error?: string } => {
   const trimmed = name.trim();
-  
+
   if (trimmed.length === 0) {
     return { valid: false, error: t.value.quizSetup.nicknameRequired };
   }
-  
+
   if (trimmed.length > 20) {
     return { valid: false, error: t.value.quizSetup.nicknameTooLong };
   }
-  
+
   // 危険な文字をチェック（HTMLタグ、スクリプトインジェクション対策）
   if (/<|>|&lt;|&gt;|<script|javascript:|on\w+=/i.test(trimmed)) {
     return { valid: false, error: t.value.quizSetup.nicknameInvalidChars };
   }
-  
+
   // 制御文字をチェック
   if (/[\x00-\x1F\x7F-\x9F]/.test(trimmed)) {
     return { valid: false, error: t.value.quizSetup.nicknameInvalidChars };
   }
-  
+
   return { valid: true };
 };
 
 const startQuiz = () => {
   const validation = validateNickname(nickname.value);
-  
+
   if (!validation.valid) {
     nicknameError.value = validation.error || '';
     return;
   }
-  
+
   // エラーをクリア
   nicknameError.value = '';
-  
+
   // ニックネームをトリミングして保存
   const sanitizedNickname = nickname.value.trim();
   localStorage.setItem(NICKNAME_STORAGE_KEY, sanitizedNickname);
@@ -84,7 +81,7 @@ const startQuiz = () => {
 };
 
 // ニックネーム入力時にエラーをクリア
-const clearNicknameError = () => {
+const _clearNicknameError = () => {
   if (nicknameError.value) {
     nicknameError.value = '';
   }

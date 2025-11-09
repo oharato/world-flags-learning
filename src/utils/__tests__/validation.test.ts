@@ -1,27 +1,27 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // ニックネームバリデーション関数（QuizSetup.vueから抽出）
 export const validateNickname = (name: string): { valid: boolean; error?: string } => {
   const trimmed = name.trim();
-  
+
   if (trimmed.length === 0) {
     return { valid: false, error: 'ニックネームを入力してください。' };
   }
-  
+
   if (trimmed.length > 20) {
     return { valid: false, error: 'ニックネームは20文字以内で入力してください。' };
   }
-  
+
   // 危険な文字をチェック（HTMLタグ、スクリプトインジェクション対策）
   if (/<|>|&lt;|&gt;|<script|javascript:|on\w+=/i.test(trimmed)) {
     return { valid: false, error: 'ニックネームに使用できない文字が含まれています。' };
   }
-  
+
   // 制御文字をチェック
   if (/[\x00-\x1F\x7F-\x9F]/.test(trimmed)) {
     return { valid: false, error: 'ニックネームに使用できない文字が含まれています。' };
   }
-  
+
   return { valid: true };
 };
 
@@ -101,7 +101,7 @@ describe('Nickname Validation', () => {
     it('特殊文字（アンダースコア、ハイフン）を含むニックネームを受け入れる', () => {
       const result1 = validateNickname('test_user');
       const result2 = validateNickname('test-user');
-      
+
       expect(result1.valid).toBe(true);
       expect(result2.valid).toBe(true);
     });

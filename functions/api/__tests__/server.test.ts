@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Hono } from 'hono';
+import { describe, expect, it } from 'vitest';
 
 describe('API Server', () => {
   describe('GET /api/ranking', () => {
@@ -18,7 +17,7 @@ describe('API Server', () => {
         region: 'all',
         format: 'flag-to-name',
       };
-      
+
       expect(validData.nickname.length).toBeLessThanOrEqual(20);
       expect(validData.score).toBeGreaterThanOrEqual(0);
     });
@@ -36,7 +35,7 @@ describe('API Server', () => {
     it('不正なフォーマットを拒否する', () => {
       const validFormats = ['flag-to-name', 'name-to-flag'];
       const invalidFormat = 'invalid-format';
-      
+
       expect(validFormats).not.toContain(invalidFormat);
     });
 
@@ -48,7 +47,7 @@ describe('API Server', () => {
         '<img src=x onerror=alert(1)>',
       ];
 
-      xssPatterns.forEach(pattern => {
+      xssPatterns.forEach((pattern) => {
         const hasXSS = /<|>|&lt;|&gt;|<script|javascript:|on\w+=/i.test(pattern);
         expect(hasXSS).toBe(true);
       });
@@ -65,24 +64,24 @@ describe('API Server', () => {
     it('正解数とタイムからスコアを計算する', () => {
       const correctAnswers = 10;
       const time = 30; // 秒
-      const score = (correctAnswers * 1000) - (time * 10);
-      
+      const score = correctAnswers * 1000 - time * 10;
+
       expect(score).toBe(9700);
     });
 
     it('スコアが負にならない', () => {
       const correctAnswers = 0;
       const time = 1000;
-      const score = Math.max(0, (correctAnswers * 1000) - (time * 10));
-      
+      const score = Math.max(0, correctAnswers * 1000 - time * 10);
+
       expect(score).toBe(0);
     });
 
     it('満点の場合のスコア', () => {
       const correctAnswers = 10;
       const time = 0;
-      const score = (correctAnswers * 1000) - (time * 10);
-      
+      const score = correctAnswers * 1000 - time * 10;
+
       expect(score).toBe(10000);
     });
   });

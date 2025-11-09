@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useTranslation } from '../composables/useTranslation';
+import { useCountriesStore } from '../store/countries';
 import { useQuizStore } from '../store/quiz';
 import { useRankingStore } from '../store/ranking';
-import { useCountriesStore } from '../store/countries';
-import { useTranslation } from '../composables/useTranslation';
-import AppButton from '../components/AppButton.vue';
 
 const router = useRouter();
 const quizStore = useQuizStore();
@@ -23,42 +22,42 @@ onMounted(() => {
   rankingStore.submitScore(quizStore.nickname, quizStore.finalScore, quizStore.quizRegion, quizStore.quizFormat);
 });
 
-const goToRanking = () => {
+const _goToRanking = () => {
   // クイズ設定をURLパラメータとしてランキング画面に渡す
   router.push({
     path: '/ranking',
     query: {
       region: quizStore.quizRegion,
       format: quizStore.quizFormat,
-      type: 'daily'
-    }
+      type: 'daily',
+    },
   });
 };
 
-const goToHome = () => {
+const _goToHome = () => {
   router.push('/');
 };
 
 // 回答履歴から選択肢のCountryオブジェクトを取得するヘルパー
-const getCountryById = (id: string) => {
-  return countriesStore.countries.find(c => c.id === id);
+const _getCountryById = (id: string) => {
+  return countriesStore.countries.find((c) => c.id === id);
 };
 
 // クイズ形式の表示名を取得
-const getQuizFormatLabel = computed(() => {
+const _getQuizFormatLabel = computed(() => {
   return quizStore.quizFormat === 'flag-to-name' ? t.value.quizFormat.flagToName : t.value.quizFormat.nameToFlag;
 });
 
 // 地域の表示名を取得
-const getRegionLabel = (region: string) => {
+const _getRegionLabel = (region: string) => {
   const regionMap: Record<string, () => string> = {
-    'all': () => t.value.region.all,
-    'Africa': () => t.value.region.africa,
-    'Asia': () => t.value.region.asia,
-    'Europe': () => t.value.region.europe,
+    all: () => t.value.region.all,
+    Africa: () => t.value.region.africa,
+    Asia: () => t.value.region.asia,
+    Europe: () => t.value.region.europe,
     'North America': () => t.value.region.northAmerica,
     'South America': () => t.value.region.southAmerica,
-    'Oceania': () => t.value.region.oceania,
+    Oceania: () => t.value.region.oceania,
   };
   return regionMap[region]?.() || region;
 };

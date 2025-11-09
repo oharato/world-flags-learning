@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 interface Props {
   src: string;
@@ -10,7 +10,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   class: '',
-  eager: false
+  eager: false,
 });
 
 const imgRef = ref<HTMLImageElement | null>(null);
@@ -38,7 +38,7 @@ onMounted(() => {
     },
     {
       rootMargin: '50px', // 50px手前から読み込み開始
-      threshold: 0.01
+      threshold: 0.01,
     }
   );
 
@@ -51,7 +51,7 @@ onUnmounted(() => {
   }
 });
 
-const handleLoad = () => {
+const _handleLoad = () => {
   isLoaded.value = true;
 };
 </script>

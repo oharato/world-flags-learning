@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { useQuizStore } from '../store/quiz';
-import { useCountriesStore } from '../store/countries';
 import { useTranslation } from '../composables/useTranslation';
 import type { Country } from '../store/countries';
-import LoadingSpinner from '../components/LoadingSpinner.vue';
-import ErrorMessage from '../components/ErrorMessage.vue';
-import AppButton from '../components/AppButton.vue';
+import { useCountriesStore } from '../store/countries';
+import { useQuizStore } from '../store/quiz';
 
 const router = useRouter();
 const quizStore = useQuizStore();
@@ -30,17 +27,18 @@ const loadedImagesCount = ref(0);
 // 画像の読み込みを監視
 const checkImagesLoaded = () => {
   if (!quizStore.currentQuestion) return;
-  
-  const totalImages = quizStore.quizFormat === 'flag-to-name' 
-    ? 1 // 問題の国旗1枚のみ
-    : quizStore.currentQuestion.options.length; // 選択肢の国旗すべて
-  
+
+  const totalImages =
+    quizStore.quizFormat === 'flag-to-name'
+      ? 1 // 問題の国旗1枚のみ
+      : quizStore.currentQuestion.options.length; // 選択肢の国旗すべて
+
   if (loadedImagesCount.value >= totalImages) {
     imagesLoaded.value = true;
   }
 };
 
-const onImageLoad = () => {
+const _onImageLoad = () => {
   loadedImagesCount.value++;
   checkImagesLoaded();
 };
@@ -49,17 +47,17 @@ const onImageLoad = () => {
 const preloadNextQuestion = () => {
   const nextIndex = quizStore.currentQuestionIndex + 1;
   if (nextIndex >= quizStore.questions.length) return;
-  
+
   const nextQuestion = quizStore.questions[nextIndex];
   if (!nextQuestion) return;
-  
+
   if (quizStore.quizFormat === 'flag-to-name') {
     // 問題の国旗をプリロード
     const img = new Image();
     img.src = nextQuestion.correctAnswer.flag_image_url;
   } else {
     // 選択肢の国旗をプリロード
-    nextQuestion.options.forEach(option => {
+    nextQuestion.options.forEach((option) => {
       const img = new Image();
       img.src = option.flag_image_url;
     });
@@ -67,18 +65,25 @@ const preloadNextQuestion = () => {
 };
 
 // 問題が変わったら画像読み込み状態をリセット & 次の問題をプリロード
-watch(() => quizStore.currentQuestionIndex, () => {
-  selectedIndex.value = 0;
-  imagesLoaded.value = false;
-  loadedImagesCount.value = 0;
-  
-  // 画像が読み込まれたら次の問題をプリロード
-  watch(imagesLoaded, (loaded) => {
-    if (loaded) {
-      preloadNextQuestion();
-    }
-  }, { once: true });
-});
+watch(
+  () => quizStore.currentQuestionIndex,
+  () => {
+    selectedIndex.value = 0;
+    imagesLoaded.value = false;
+    loadedImagesCount.value = 0;
+
+    // 画像が読み込まれたら次の問題をプリロード
+    watch(
+      imagesLoaded,
+      (loaded) => {
+        if (loaded) {
+          preloadNextQuestion();
+        }
+      },
+      { once: true }
+    );
+  }
+);
 
 onMounted(async () => {
   if (countriesStore.countries.length === 0 && !countriesStore.loading) {
@@ -97,7 +102,7 @@ onMounted(async () => {
   timer = setInterval(() => {
     elapsedTime.value = Math.floor((Date.now() - quizStore.startTime) / 1000);
   }, 1000);
-  
+
   // キーボードイベントリスナーを追加
   window.addEventListener('keydown', handleKeydown);
 });
@@ -107,21 +112,24 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeydown);
 });
 
-watch(() => quizStore.endTime, (newEndTime) => {
-  if (newEndTime > 0) {
-    clearInterval(timer);
-    router.push('/quiz/result');
+watch(
+  () => quizStore.endTime,
+  (newEndTime) => {
+    if (newEndTime > 0) {
+      clearInterval(timer);
+      router.push('/quiz/result');
+    }
   }
-});
+);
 
 // キーボード操作
 const handleKeydown = (e: KeyboardEvent) => {
   if (!quizStore.currentQuestion || !imagesLoaded.value) return;
-  
+
   const optionsCount = quizStore.currentQuestion.options.length;
   // 画面幅をチェック（768px未満はモバイル、1列表示）
   const isMobile = window.innerWidth < 768;
-  
+
   switch (e.key) {
     case 'ArrowUp':
       e.preventDefault();
@@ -130,9 +138,8 @@ const handleKeydown = (e: KeyboardEvent) => {
         selectedIndex.value = selectedIndex.value > 0 ? selectedIndex.value - 1 : selectedIndex.value;
       } else {
         // デスクトップ: 2つ上に移動（2列グリッド）
-        selectedIndex.value = selectedIndex.value === 0 || selectedIndex.value === 1 
-          ? selectedIndex.value 
-          : selectedIndex.value - 2;
+        selectedIndex.value =
+          selectedIndex.value === 0 || selectedIndex.value === 1 ? selectedIndex.value : selectedIndex.value - 2;
       }
       break;
     case 'ArrowDown':
@@ -142,9 +149,7 @@ const handleKeydown = (e: KeyboardEvent) => {
         selectedIndex.value = selectedIndex.value < optionsCount - 1 ? selectedIndex.value + 1 : selectedIndex.value;
       } else {
         // デスクトップ: 2つ下に移動（2列グリッド）
-        selectedIndex.value = selectedIndex.value >= optionsCount - 2 
-          ? selectedIndex.value 
-          : selectedIndex.value + 2;
+        selectedIndex.value = selectedIndex.value >= optionsCount - 2 ? selectedIndex.value : selectedIndex.value + 2;
       }
       break;
     case 'ArrowLeft':
@@ -159,19 +164,20 @@ const handleKeydown = (e: KeyboardEvent) => {
         selectedIndex.value++;
       }
       break;
-    case 'Enter':
+    case 'Enter': {
       e.preventDefault();
       const selectedOption = quizStore.currentQuestion.options[selectedIndex.value];
       if (selectedOption) {
         handleAnswer(selectedOption, selectedIndex.value);
       }
       break;
+    }
   }
 };
 
 const handleAnswer = (option: Country, index: number) => {
   if (!imagesLoaded.value) return; // 画像が読み込まれるまで回答を無効化
-  
+
   // スマホの場合は一瞬だけ強調表示
   const isMobile = window.innerWidth < 768;
   if (isMobile) {
@@ -186,7 +192,7 @@ const handleAnswer = (option: Country, index: number) => {
 };
 
 // マウスホバー時に選択状態を更新
-const handleMouseEnter = (index: number) => {
+const _handleMouseEnter = (index: number) => {
   selectedIndex.value = index;
 };
 </script>

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import LanguageSelector from '../components/LanguageSelector.vue';
-import AppButton from '../components/AppButton.vue';
 import { useTranslation } from '../composables/useTranslation';
 
 const { t } = useTranslation();

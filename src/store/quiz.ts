@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useCountriesStore, type Country } from './countries';
+import { type Country, useCountriesStore } from './countries';
 
 export type QuizFormat = 'flag-to-name' | 'name-to-flag';
 // QuizRegionの型定義を拡張
@@ -42,46 +42,52 @@ export const useQuizStore = defineStore('quiz', {
 
       // 大陸名の正規化マップ（日本語/英語 → 英語に統一）
       const normalizeContinentMap: Record<string, string> = {
-        'Africa': 'Africa',
-        'アフリカ': 'Africa',
-        'Asia': 'Asia',
-        'アジア': 'Asia',
-        'Europe': 'Europe',
-        'ヨーロッパ': 'Europe',
+        Africa: 'Africa',
+        アフリカ: 'Africa',
+        Asia: 'Asia',
+        アジア: 'Asia',
+        Europe: 'Europe',
+        ヨーロッパ: 'Europe',
         'North America': 'North America',
-        '北アメリカ': 'North America',
+        北アメリカ: 'North America',
         'South America': 'South America',
-        '南アメリカ': 'South America',
-        'Oceania': 'Oceania',
-        'オセアニア': 'Oceania',
-        'Antarctica': 'Antarctica',
-        '南極': 'Antarctica',
+        南アメリカ: 'South America',
+        Oceania: 'Oceania',
+        オセアニア: 'Oceania',
+        Antarctica: 'Antarctica',
+        南極: 'Antarctica',
       };
 
       // 選択された地域に基づいて国をフィルタリング
-      const filteredCountries = this.quizRegion === 'all'
-        ? countriesStore.countries
-        : countriesStore.countries.filter(country => {
-            const normalizedContinent = normalizeContinentMap[country.continent] || country.continent;
-            return normalizedContinent === this.quizRegion;
-          });
+      const filteredCountries =
+        this.quizRegion === 'all'
+          ? countriesStore.countries
+          : countriesStore.countries.filter((country) => {
+              const normalizedContinent = normalizeContinentMap[country.continent] || country.continent;
+              return normalizedContinent === this.quizRegion;
+            });
 
       // 実際の問題数を決定（「すべて」が選択された場合は利用可能な全ての国）
-      const actualNumberOfQuestions = this.numberOfQuestions >= 999
-        ? filteredCountries.length
-        : Math.min(this.numberOfQuestions, filteredCountries.length);
+      const actualNumberOfQuestions =
+        this.numberOfQuestions >= 999
+          ? filteredCountries.length
+          : Math.min(this.numberOfQuestions, filteredCountries.length);
 
       if (filteredCountries.length < this.numberOfQuestions && this.numberOfQuestions < 999) {
-        console.warn(`Not enough countries in ${this.quizRegion} for ${this.numberOfQuestions} questions. Using all available countries (${filteredCountries.length}).`);
+        console.warn(
+          `Not enough countries in ${this.quizRegion} for ${this.numberOfQuestions} questions. Using all available countries (${filteredCountries.length}).`
+        );
       }
 
       // フィルタリングされた国からランダムに問題数分を選択
-      const selectedCountriesForQuiz = [...filteredCountries].sort(() => 0.5 - Math.random()).slice(0, actualNumberOfQuestions);
+      const selectedCountriesForQuiz = [...filteredCountries]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, actualNumberOfQuestions);
 
-      this.questions = selectedCountriesForQuiz.map(correctCountry => {
+      this.questions = selectedCountriesForQuiz.map((correctCountry) => {
         // 選択肢もフィルタリングされた国の中から選ぶ
         const otherOptions = [...filteredCountries]
-          .filter(c => c.id !== correctCountry.id)
+          .filter((c) => c.id !== correctCountry.id)
           .sort(() => 0.5 - Math.random())
           .slice(0, 3);
         const options = [...otherOptions, correctCountry].sort(() => 0.5 - Math.random());
@@ -112,7 +118,7 @@ export const useQuizStore = defineStore('quiz', {
         console.error('No current question available');
         return;
       }
-      
+
       const isCorrect = selectedCountryId === currentQuestion.correctAnswer.id;
 
       this.answerHistory.push({
@@ -146,11 +152,11 @@ export const useQuizStore = defineStore('quiz', {
       if (state.startTime === 0 || state.endTime === 0) return 0;
       const time = (state.endTime - state.startTime) / 1000;
       // スコア = (正解数 * 1000) - (回答時間[秒] * 10)
-      return Math.max(0, (state.correctAnswers * 1000) - (Math.round(time) * 10));
+      return Math.max(0, state.correctAnswers * 1000 - Math.round(time) * 10);
     },
     currentQuestion: (state): Question | null => {
-        if (state.questions.length === 0) return null;
-        return state.questions[state.currentQuestionIndex] ?? null;
-    }
+      if (state.questions.length === 0) return null;
+      return state.questions[state.currentQuestionIndex] ?? null;
+    },
   },
 });

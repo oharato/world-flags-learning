@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
-import { VitePWA } from 'vite-plugin-pwa'
+import vue from '@vitejs/plugin-vue';
+import { defineConfig } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -20,9 +20,9 @@ export default defineConfig({
           {
             src: '/favicon.ico',
             sizes: '64x64 32x32 24x24 16x16',
-            type: 'image/x-icon'
-          }
-        ]
+            type: 'image/x-icon',
+          },
+        ],
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
@@ -34,12 +34,12 @@ export default defineConfig({
               cacheName: 'flag-images',
               expiration: {
                 maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30日間
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30日間
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
           {
             urlPattern: /^https:\/\/.*\.png$/i,
@@ -48,12 +48,12 @@ export default defineConfig({
               cacheName: 'map-images',
               expiration: {
                 maxEntries: 300,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30日間
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30日間
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
+                statuses: [0, 200],
+              },
+            },
           },
           {
             urlPattern: /^https:\/\/.*\.json$/i,
@@ -62,19 +62,19 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 // 24時間
+                maxAgeSeconds: 60 * 60 * 24, // 24時間
               },
               cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
       },
       devOptions: {
-        enabled: true // 開発環境でもPWAをテスト可能
-      }
-    })
+        enabled: true, // 開発環境でもPWAをテスト可能
+      },
+    }),
   ],
   server: {
     proxy: {
@@ -98,4 +98,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
