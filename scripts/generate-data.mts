@@ -909,6 +909,46 @@ const main = async () => {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
+  // ソート処理1: countries.ja.jsonのnameの順番をflag-page-mapping.jsonのキーの順番に揃える
+  console.log('\nSorting countries.ja.json according to flag-page-mapping.json order...');
+  const flagMapping = await loadFlagPageMapping();
+  const mappingKeys = Object.keys(flagMapping);
+
+  // マッピングに存在する国を順序通りに並べる
+  const sortedJa = mappingKeys
+    .map((key) => allDataJa.find((c) => c.name === key))
+    .filter((c): c is CountryData => c !== undefined);
+
+  // マッピングに存在しない国を最後に追加（元の順序を維持）
+  const unmappedJa = allDataJa.filter((c) => !mappingKeys.includes(c.name));
+  allDataJa = [...sortedJa, ...unmappedJa];
+
+  console.log(
+    `  ✓ Sorted ${sortedJa.length} countries by mapping order, ${unmappedJa.length} unmapped countries added at end`
+  );
+
+  // ソート処理2: countries.en.jsonのidの順番をcountries.ja.jsonのidの順番に揃える
+  console.log('Sorting countries.en.json according to countries.ja.json id order...');
+  const jaIdOrder = allDataJa.map((c) => c.id);
+
+  // 日本語版に存在するidの順序通りに並べる
+  const sortedEn = jaIdOrder
+    .map((id) => allDataEn.find((c) => c.id === id))
+    .filter((c): c is CountryData => c !== undefined);
+
+  // 日本語版に存在しないidを最後に追加（元の順序を維持）
+  const unmappedEn = allDataEn.filter((c) => !jaIdOrder.includes(c.id));
+  allDataEn = [...sortedEn, ...unmappedEn];
+
+  console.log(
+    `  ✓ Sorted ${sortedEn.length} countries by ja id order, ${unmappedEn.length} unmapped countries added at end`
+  );
+
+  // ソート後のデータを最終保存
+  await fs.writeFile(outputPathJa, JSON.stringify(allDataJa, null, 2));
+  await fs.writeFile(outputPathEn, JSON.stringify(allDataEn, null, 2));
+  console.log('  ✓ Final sorted data saved to files');
+
   console.log(`\nSuccessfully generated countries.ja.json with ${allDataJa.length} countries.`);
   console.log(`Successfully generated countries.en.json with ${allDataEn.length} countries.`);
 };

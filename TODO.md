@@ -179,6 +179,9 @@
     - [x] public/ ディレクトリの変更を自動コミット
     - [x] コミットメッセージ形式: "update by gha on {datetime}"
     - [x] 自動デプロイの統合
+    - [x] update-data.yml に git pull ステップを追加（generate-data実行前）
+    - [x] generate-data.mts に countries.ja.json のソート処理を追加（flag-page-mapping.json のキー順に揃える）
+    - [x] generate-data.mts に countries.en.json のソート処理を追加（countries.ja.json の id 順に揃える）
 
 ## 今後の改善候補
 

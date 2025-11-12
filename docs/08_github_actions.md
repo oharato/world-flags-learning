@@ -49,11 +49,15 @@
 1. リポジトリのチェックアウト
 2. Node.js 20のセットアップ
 3. 依存関係のインストール
-4. 国データ生成スクリプトの実行 (`npm run batch:create-data`)
-5. 変更の検出と自動コミット（コミットメッセージ: "update by gha on {日時}"）
-6. ビルド（変更がある場合のみ）
-7. D1データベースのマイグレーション適用（変更がある場合のみ）
-8. Cloudflare Pagesへのデプロイ（変更がある場合のみ）
+4. 最新の変更を取得（git pull）
+5. 国データ生成スクリプトの実行 (`npm run batch:create-data`)
+   - Wikipedia と Wikidata からデータを取得
+   - countries.ja.json を flag-page-mapping.json のキー順にソート
+   - countries.en.json を countries.ja.json の id 順にソート
+6. 変更の検出と自動コミット（コミットメッセージ: "update by gha on {日時}"）
+7. ビルド（変更がある場合のみ）
+8. D1データベースのマイグレーション適用（変更がある場合のみ）
+9. Cloudflare Pagesへのデプロイ（変更がある場合のみ）
 
 **注意事項**:
 - データ生成には最大90分のタイムアウトが設定されています
@@ -309,6 +313,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Pull latest changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git pull origin ${{ github.ref_name }}
+
       - name: Generate country data
         run: npm run batch:create-data
         timeout-minutes: 75 # データ生成に最大75分を許可
@@ -357,6 +367,11 @@ jobs:
 ```
 
 **注**: 
+- 実行前に git pull を行い、最新の変更を取得します
+- データ生成スクリプトは以下の処理を実行します:
+  - Wikipedia と Wikidata から国データを取得
+  - countries.ja.json を flag-page-mapping.json のキー順にソート
+  - countries.en.json を countries.ja.json の id 順にソート
 - データ生成は最大90分のタイムアウトが設定されています
 - 変更がない場合、コミット・ビルド・デプロイはスキップされます
 - コミットメッセージは日本時間（JST）の日時が自動的に追加されます
