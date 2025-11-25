@@ -20,7 +20,113 @@ interface RankRow {
   rank: number;
 }
 
+// ログ出力用のユーティリティ関数
+interface AccessLogData {
+  timestamp: string;
+  method: string;
+  path: string;
+  ip: string;
+  country: string;
+  userAgent: string;
+  statusCode: number;
+  responseTimeMs: number;
+}
+
+interface ErrorLogData {
+  timestamp: string;
+  method: string;
+  path: string;
+  ip: string;
+  country: string;
+  userAgent: string;
+  statusCode: number;
+  errorMessage: string;
+  stackTrace?: string;
+}
+
+function getClientInfo(c: { req: { raw: Request } }) {
+  const cfProperties = (c.req.raw as RequestWithCf).cf;
+  return {
+    ip: c.req.raw.headers.get('cf-connecting-ip') || c.req.raw.headers.get('x-forwarded-for') || 'unknown',
+    country: cfProperties?.country || 'unknown',
+    userAgent: c.req.raw.headers.get('user-agent') || 'unknown',
+  };
+}
+
+function logAccess(data: AccessLogData) {
+  console.log(
+    JSON.stringify({
+      type: 'access',
+      ...data,
+    })
+  );
+}
+
+function logError(data: ErrorLogData) {
+  console.error(
+    JSON.stringify({
+      type: 'error',
+      ...data,
+    })
+  );
+}
+
+// Cloudflare Workers の Request 拡張型
+interface RequestWithCf extends Request {
+  cf?: {
+    country?: string;
+    city?: string;
+    continent?: string;
+    region?: string;
+    timezone?: string;
+  };
+}
+
 const app = new Hono<{ Bindings: Bindings }>();
+
+// アクセスログ・エラーログ用ミドルウェア
+app.use('*', async (c, next) => {
+  const startTime = Date.now();
+  const { ip, country, userAgent } = getClientInfo(c);
+  const method = c.req.method;
+  const path = new URL(c.req.url).pathname;
+
+  try {
+    await next();
+
+    // アクセスログを記録
+    const responseTimeMs = Date.now() - startTime;
+    logAccess({
+      timestamp: new Date().toISOString(),
+      method,
+      path,
+      ip,
+      country,
+      userAgent,
+      statusCode: c.res.status,
+      responseTimeMs,
+    });
+  } catch (error) {
+    // エラーログを記録
+    const responseTimeMs = Date.now() - startTime;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const stackTrace = error instanceof Error ? error.stack : undefined;
+
+    logError({
+      timestamp: new Date().toISOString(),
+      method,
+      path,
+      ip,
+      country,
+      userAgent,
+      statusCode: 500,
+      errorMessage,
+      stackTrace,
+    });
+
+    throw error;
+  }
+});
 
 // GET /api/ranking - ランキング取得
 app.get('/api/ranking', async (c) => {

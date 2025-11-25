@@ -109,6 +109,37 @@ export interface Translations {
     southAmerica: string;
     oceania: string;
   };
+  privacyPolicy: {
+    title: string;
+    lastUpdated: string;
+    introductionTitle: string;
+    introductionText: string;
+    dataCollectedTitle: string;
+    dataCollectedIntro: string;
+    dataItem1: string;
+    dataItem2: string;
+    dataItem3: string;
+    dataItem4: string;
+    dataItem5: string;
+    purposeTitle: string;
+    purposeIntro: string;
+    purposeItem1: string;
+    purposeItem2: string;
+    purposeItem3: string;
+    analyticsTitle: string;
+    analyticsText: string;
+    cookiesTitle: string;
+    cookiesText: string;
+    dataStorageTitle: string;
+    dataStorageText: string;
+    thirdPartyTitle: string;
+    thirdPartyText: string;
+    contactTitle: string;
+    contactText: string;
+  };
+  footer: {
+    privacyPolicy: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -220,6 +251,43 @@ export const translations: Record<Language, Translations> = {
       southAmerica: '南アメリカ',
       oceania: 'オセアニア',
     },
+    privacyPolicy: {
+      title: 'プライバシーポリシー',
+      lastUpdated: '最終更新日',
+      introductionTitle: 'はじめに',
+      introductionText:
+        '国旗学習アプリ（以下「本アプリ」）は、ユーザーのプライバシーを尊重し、個人情報の保護に努めています。本プライバシーポリシーでは、本アプリがどのような情報を収集し、どのように利用するかについて説明します。',
+      dataCollectedTitle: '収集する情報',
+      dataCollectedIntro: '本アプリでは、サービスの提供と改善のために以下の情報を収集する場合があります：',
+      dataItem1: 'IPアドレス（国・地域の推定に使用）',
+      dataItem2: 'ブラウザの種類とバージョン',
+      dataItem3: 'アクセス日時',
+      dataItem4: '閲覧したページ',
+      dataItem5: 'ニックネーム（ランキング登録時のみ、任意入力）',
+      purposeTitle: '情報の利用目的',
+      purposeIntro: '収集した情報は、以下の目的で利用します：',
+      purposeItem1: 'サービスの提供と運用',
+      purposeItem2: 'サービスの改善とパフォーマンス最適化',
+      purposeItem3: '不正アクセスの検知と防止',
+      analyticsTitle: 'アナリティクス',
+      analyticsText:
+        '本アプリでは、Cloudflare Web Analyticsを使用してサイトの利用状況を分析しています。Cloudflare Web Analyticsは、プライバシーを重視した分析ツールであり、Cookieを使用せず、個人を特定する情報を収集しません。収集されるデータは匿名化され、ページビューや訪問者数などの集計データのみが記録されます。',
+      cookiesTitle: 'Cookieについて',
+      cookiesText:
+        '本アプリは、Cookieを使用していません。言語設定やニックネームなどのユーザー設定は、ブラウザのlocalStorageに保存されます。これらのデータはサーバーに送信されず、お使いのブラウザ内にのみ保存されます。',
+      dataStorageTitle: 'データの保存',
+      dataStorageText:
+        'ランキングデータ（ニックネーム、スコア、登録日時）は、Cloudflare D1データベースに保存されます。これらのデータは、ランキング機能の提供に必要な期間保存されます。アクセスログは一定期間後に自動的に削除されます。',
+      thirdPartyTitle: '第三者への提供',
+      thirdPartyText:
+        '本アプリは、法令に基づく場合を除き、収集した情報を第三者に提供することはありません。ただし、サービスの運営に必要なCloudflareのサービスを利用しており、Cloudflareのプライバシーポリシーが適用されます。',
+      contactTitle: 'お問い合わせ',
+      contactText:
+        '本プライバシーポリシーに関するご質問やご意見がございましたら、GitHubリポジトリのIssueよりお問い合わせください。',
+    },
+    footer: {
+      privacyPolicy: 'プライバシーポリシー',
+    },
   },
   en: {
     common: {
@@ -328,6 +396,43 @@ export const translations: Record<Language, Translations> = {
       northAmerica: 'North America',
       southAmerica: 'South America',
       oceania: 'Oceania',
+    },
+    privacyPolicy: {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last Updated',
+      introductionTitle: 'Introduction',
+      introductionText:
+        'World Flags Learning Game (hereinafter "this app") respects user privacy and is committed to protecting personal information. This Privacy Policy explains what information this app collects and how it is used.',
+      dataCollectedTitle: 'Information We Collect',
+      dataCollectedIntro: 'This app may collect the following information to provide and improve our services:',
+      dataItem1: 'IP address (used to estimate country/region)',
+      dataItem2: 'Browser type and version',
+      dataItem3: 'Access date and time',
+      dataItem4: 'Pages viewed',
+      dataItem5: 'Nickname (only when registering for ranking, optional)',
+      purposeTitle: 'How We Use Information',
+      purposeIntro: 'We use the collected information for the following purposes:',
+      purposeItem1: 'Providing and operating our services',
+      purposeItem2: 'Improving services and optimizing performance',
+      purposeItem3: 'Detecting and preventing unauthorized access',
+      analyticsTitle: 'Analytics',
+      analyticsText:
+        'This app uses Cloudflare Web Analytics to analyze site usage. Cloudflare Web Analytics is a privacy-focused analytics tool that does not use cookies and does not collect personally identifiable information. The collected data is anonymized, and only aggregate data such as page views and visitor counts are recorded.',
+      cookiesTitle: 'About Cookies',
+      cookiesText:
+        "This app does not use cookies. User settings such as language preferences and nicknames are stored in your browser's localStorage. This data is not sent to the server and is only stored within your browser.",
+      dataStorageTitle: 'Data Storage',
+      dataStorageText:
+        'Ranking data (nickname, score, registration date) is stored in Cloudflare D1 database. This data is retained for as long as necessary to provide the ranking feature. Access logs are automatically deleted after a certain period.',
+      thirdPartyTitle: 'Third Party Disclosure',
+      thirdPartyText:
+        "This app does not provide collected information to third parties except as required by law. However, we use Cloudflare services for operation, and Cloudflare's privacy policy applies.",
+      contactTitle: 'Contact Us',
+      contactText:
+        'If you have any questions or concerns about this Privacy Policy, please contact us through GitHub repository Issues.',
+    },
+    footer: {
+      privacyPolicy: 'Privacy Policy',
     },
   },
 };
