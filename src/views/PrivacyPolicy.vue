@@ -2,6 +2,9 @@
 import { useTranslation } from '../composables/useTranslation';
 
 const { t } = useTranslation();
+
+// Privacy policy last updated date - update this when the policy changes
+const PRIVACY_POLICY_LAST_UPDATED = '2025-06-09';
 </script>
 
 <template>
@@ -11,7 +14,7 @@ const { t } = useTranslation();
 
     <div class="bg-white rounded-lg shadow p-6 space-y-6">
       <!-- 最終更新日 -->
-      <p class="text-sm text-gray-500 text-right">{{ t.privacyPolicy.lastUpdated }}: 2025-06-09</p>
+      <p class="text-sm text-gray-500 text-right">{{ t.privacyPolicy.lastUpdated }}: {{ PRIVACY_POLICY_LAST_UPDATED }}</p>
 
       <!-- はじめに -->
       <section>
