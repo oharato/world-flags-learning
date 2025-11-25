@@ -13,8 +13,10 @@ const isSubmitting = ref(false);
 const submitStatus = ref<'idle' | 'success' | 'error'>('idle');
 const errorMessage = ref('');
 
-// Formspree endpoint - replace YOUR_FORM_ID with your actual form ID
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
+// Formspree endpoint - configure via environment variable VITE_FORMSPREE_ID
+// See docs/12_contact_form.md for setup instructions
+const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID || '';
+const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_ID}`;
 
 const validateForm = (): { valid: boolean; error?: string } => {
   if (!name.value.trim()) {
@@ -38,6 +40,12 @@ const handleSubmit = async () => {
   const validation = validateForm();
   if (!validation.valid) {
     errorMessage.value = validation.error || '';
+    return;
+  }
+
+  // Check if Formspree is configured
+  if (!FORMSPREE_ID) {
+    errorMessage.value = t.value.contact.submitError;
     return;
   }
 
@@ -68,9 +76,13 @@ const handleSubmit = async () => {
       submitStatus.value = 'error';
       errorMessage.value = t.value.contact.submitError;
     }
-  } catch {
+  } catch (error) {
     submitStatus.value = 'error';
     errorMessage.value = t.value.contact.submitError;
+    // Log error for debugging (will be stripped in production by build tools if needed)
+    if (import.meta.env.DEV) {
+      console.error('Form submission error:', error);
+    }
   } finally {
     isSubmitting.value = false;
   }

@@ -32,17 +32,9 @@ Formspree は、静的サイトにフォーム機能を追加できるサービ�
 4. 送信先のメールアドレスを設定
 5. 作成後、フォームIDを取得（例：`abcd1234`）
 
-### 3. アプリケーションの設定
+### 3. 環境変数の設定
 
-`src/views/Contact.vue` ファイル内のFormspreeエンドポイントを更新します：
-
-```typescript
-// 現在の設定（プレースホルダー）
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/YOUR_FORM_ID';
-
-// 取得したフォームIDで置き換え
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/abcd1234';
-```
+取得したフォームIDを環境変数として設定します。詳細は下記の「環境変数での管理」セクションを参照してください。
 
 ### 4. スパム対策
 
@@ -68,9 +60,9 @@ Formspreeダッシュボードで以下の設定が可能です：
 npm run deploy
 ```
 
-## 環境変数での管理（推奨）
+## 環境変数での管理（必須）
 
-セキュリティ上、フォームIDを環境変数で管理することを推奨します：
+フォームIDは環境変数で管理します。環境変数が設定されていない場合、フォーム送信は無効になります。
 
 ### Vite環境変数の設定
 
@@ -79,14 +71,19 @@ npm run deploy
 VITE_FORMSPREE_ID=your_form_id
 ```
 
-2. `Contact.vue` でエンドポイントを更新：
-```typescript
-const FORMSPREE_ENDPOINT = `https://formspree.io/f/${import.meta.env.VITE_FORMSPREE_ID || 'YOUR_FORM_ID'}`;
-```
-
-3. Cloudflare Pages の環境変数にも設定：
+2. Cloudflare Pages の環境変数にも設定：
    - Cloudflare ダッシュボード → Pages → プロジェクト → Settings → Environment variables
    - `VITE_FORMSPREE_ID` を追加
+
+### 実装の仕組み
+
+`Contact.vue` では環境変数からフォームIDを取得します：
+```typescript
+const FORMSPREE_ID = import.meta.env.VITE_FORMSPREE_ID || '';
+const FORMSPREE_ENDPOINT = `https://formspree.io/f/${FORMSPREE_ID}`;
+```
+
+環境変数が設定されていない場合、送信時にエラーメッセージが表示されます。
 
 ## フォームフィールド
 
