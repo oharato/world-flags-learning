@@ -98,7 +98,7 @@ onMounted(async () => {
     router.push('/quiz');
     return;
   }
-  quizStore.startQuiz();
+  await quizStore.startQuiz();
   timer = setInterval(() => {
     elapsedTime.value = Math.floor((Date.now() - quizStore.startTime) / 1000);
   }, 1000);

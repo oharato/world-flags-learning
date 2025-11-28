@@ -20,7 +20,13 @@ onMounted(() => {
     return;
   }
   // 選択した地域とクイズ形式でランキングにスコアを登録
-  rankingStore.submitScore(quizStore.nickname, quizStore.finalScore, quizStore.quizRegion, quizStore.quizFormat);
+  rankingStore.submitScore(quizStore.nickname, quizStore.finalScore, quizStore.quizRegion, quizStore.quizFormat, {
+    correctAnswers: quizStore.correctAnswers,
+    timeInSeconds: quizStore.totalTime,
+    numberOfQuestions: quizStore.questions.length,
+    sessionToken: quizStore.sessionToken,
+    answeredQuestionIds: quizStore.answeredQuestionIds,
+  });
 });
 
 const goToRanking = () => {

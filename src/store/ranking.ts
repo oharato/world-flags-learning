@@ -40,16 +40,39 @@ export const useRankingStore = defineStore('ranking', {
         this.loading = false;
       }
     },
-    async submitScore(nickname: string, score: number, region: string = 'all', format: QuizFormat = 'flag-to-name') {
+    async submitScore(
+      nickname: string,
+      score: number,
+      region: string = 'all',
+      format: QuizFormat = 'flag-to-name',
+      validationParams?: {
+        correctAnswers: number;
+        timeInSeconds: number;
+        numberOfQuestions: number;
+        sessionToken: string;
+        answeredQuestionIds: string[];
+      }
+    ) {
       this.loading = true;
       this.error = null;
       try {
+        const body: any = { nickname, score, region, format };
+
+        // Add validation parameters if provided
+        if (validationParams) {
+          body.correctAnswers = validationParams.correctAnswers;
+          body.timeInSeconds = validationParams.timeInSeconds;
+          body.numberOfQuestions = validationParams.numberOfQuestions;
+          body.sessionToken = validationParams.sessionToken;
+          body.answeredQuestionIds = validationParams.answeredQuestionIds;
+        }
+
         const response = await fetch('/api/ranking', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ nickname, score, region, format }),
+          body: JSON.stringify(body),
         });
         if (!response.ok) {
           const errorData = await response.json();

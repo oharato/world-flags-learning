@@ -241,6 +241,45 @@
     *   `GET /api/ranking?region={region}&type={daily|all_time}&format={flag-to-name|name-to-flag}`: 地域別・タイプ別・形式別ランキング取得
     *   `POST /api/ranking`: スコア登録（日次ランキングと全期間トップ5に記録、regionとformatを含む）
 
+#### セキュリティ機能
+
+##### レート制限 (Rate Limiting)
+*   **実装**: カスタムミドルウェア (`functions/api/middleware/rateLimiter.ts`)
+*   **制限**: 1分間に10リクエストまで（IPアドレスごと）
+*   **識別方法**:
+    1.  Cloudflare の `cf-connecting-ip` ヘッダー（優先）
+    2.  `x-forwarded-for` ヘッダー（フォールバック）
+    3.  `x-real-ip` ヘッダー（フォールバック）
+    4.  'unknown'（すべてのヘッダーがない場合）
+*   **ストレージ**: インメモリ Map (Cloudflare Workers 内で永続化)
+*   **クリーンアップ**: 1分ごとに期限切れエントリを削除
+*   **超過時の挙動**:
+    *   HTTPステータスコード: `429 Too Many Requests`
+    *   `Retry-After` ヘッダー: 次のリクエストまでの待機時間（秒）
+    *   JSON レスポンス: エラーメッセージと待機時間
+
+##### スコア検証 (Score Validation)
+*   **実装**: ユーティリティ関数 (`functions/api/utils/scoreValidation.ts`)
+*   **検証項目**:
+    1.  **正解数の妥当性**: 0以上、問題数以下であることを確認
+    2.  **回答時間の妥当性**:
+        *   最小時間: 問題数 × 0.5秒（人間の反応時間を考慮）
+        *   最大時間: 問題数 × 5分（タイムアウトを考慮）
+    3.  **スコア計算の一致性**: `(正解数 × 1000) - (回答時間[秒] × 10)` と一致するか確認（±100点の許容誤差）
+    4.  **理論上の最大値**: 問題数 × 1000 を超えないことを確認
+    5.  **負のスコア**: スコアが0以上であることを確認
+*   **不正検出時の挙動**:
+    *   HTTPステータスコード: `400 Bad Request`
+    *   JSON レスポンス: 具体的な理由を含むエラーメッセージ
+
+##### API スキーマ拡張
+*   **追加パラメータ**:
+    *   `correctAnswers` (number): 正解数
+    *   `timeInSeconds` (number): 回答時間（秒）
+    *   `numberOfQuestions` (number): 問題数
+*   **目的**: サーバー側でスコアを再計算し、クライアント側で改ざんされたスコアを検出
+*   **バリデーション**: Zod スキーマでデータ型と範囲を検証
+
 ### 3.4. マイグレーション管理
 *   **ツール**: Wrangler CLI
 *   **マイグレーションファイル**: `migrations/` ディレクトリに配置
