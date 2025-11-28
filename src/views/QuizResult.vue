@@ -24,6 +24,8 @@ onMounted(() => {
     correctAnswers: quizStore.correctAnswers,
     timeInSeconds: quizStore.totalTime,
     numberOfQuestions: quizStore.questions.length,
+    sessionToken: quizStore.sessionToken,
+    answeredQuestionIds: quizStore.answeredQuestionIds,
   });
 });
 

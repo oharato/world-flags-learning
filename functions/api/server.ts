@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { rateLimiter } from './middleware/rateLimiter';
 import { validateScore } from './utils/scoreValidation';
+import { generateSessionToken, validateQuizCompletion } from './utils/sessionToken';
 
 type Bindings = {
   DB: D1Database;
@@ -67,6 +68,47 @@ app.get('/api/ranking', async (c) => {
   }
 });
 
+// POST /api/quiz/start - クイズセッション開始
+const quizStartSchema = z.object({
+  numberOfQuestions: z.number().int().min(1).max(1000),
+  region: z.string().default('all'),
+  format: z.enum(['flag-to-name', 'name-to-flag']).default('flag-to-name'),
+  questionIds: z.array(z.string()).min(1),
+});
+
+app.post('/api/quiz/start', zValidator('json', quizStartSchema), async (c) => {
+  try {
+    const { numberOfQuestions, region, format, questionIds } = c.req.valid('json');
+
+    // Validate that questionIds length matches numberOfQuestions
+    if (questionIds.length !== numberOfQuestions) {
+      return c.json(
+        {
+          error: '問題数とquestionIdsの数が一致しません',
+        },
+        400
+      );
+    }
+
+    // Generate session token
+    const sessionToken = await generateSessionToken({
+      startTime: Date.now(),
+      numberOfQuestions,
+      region,
+      format,
+      questionIds,
+    });
+
+    return c.json({
+      sessionToken,
+      message: 'クイズセッションを開始しました',
+    });
+  } catch (e: any) {
+    console.error('Quiz start error:', e);
+    return c.json({ error: 'クイズセッションの開始に失敗しました', details: e.message }, 500);
+  }
+});
+
 // POST /api/ranking - スコア登録
 const scoreSchema = z.object({
   nickname: z
@@ -86,6 +128,9 @@ const scoreSchema = z.object({
   correctAnswers: z.number().int().min(0),
   timeInSeconds: z.number().min(0),
   numberOfQuestions: z.number().int().min(1).max(1000),
+  // Session token for quiz flow verification
+  sessionToken: z.string().min(1, 'セッショントークンは必須です'),
+  answeredQuestionIds: z.array(z.string()).min(1),
 });
 
 app.post(
@@ -93,10 +138,48 @@ app.post(
   rateLimiter({ windowMs: 60000, maxRequests: 10 }), // 10 requests per minute per IP
   zValidator('json', scoreSchema),
   async (c) => {
-    const { nickname, score, region, format, correctAnswers, timeInSeconds, numberOfQuestions } = c.req.valid('json');
+    const {
+      nickname,
+      score,
+      region,
+      format,
+      correctAnswers,
+      timeInSeconds,
+      numberOfQuestions,
+      sessionToken,
+      answeredQuestionIds,
+    } = c.req.valid('json');
 
     // ニックネームをサニタイズ（追加の安全対策）
     const sanitizedNickname = nickname.trim().substring(0, 20);
+
+    // Validate session token and quiz completion
+    const sessionValidation = await validateQuizCompletion({
+      sessionToken,
+      correctAnswers,
+      timeInSeconds,
+      answeredQuestionIds,
+    });
+
+    if (!sessionValidation.valid) {
+      return c.json(
+        {
+          error: `セッション検証エラー: ${sessionValidation.reason}`,
+        },
+        400
+      );
+    }
+
+    // Verify region and format match the session token
+    const { payload } = sessionValidation;
+    if (payload.region !== region || payload.format !== format) {
+      return c.json(
+        {
+          error: 'クイズ設定がセッションと一致しません',
+        },
+        400
+      );
+    }
 
     // Validate score to prevent tampering
     const validation = validateScore({

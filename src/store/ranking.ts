@@ -45,7 +45,13 @@ export const useRankingStore = defineStore('ranking', {
       score: number,
       region: string = 'all',
       format: QuizFormat = 'flag-to-name',
-      validationParams?: { correctAnswers: number; timeInSeconds: number; numberOfQuestions: number }
+      validationParams?: {
+        correctAnswers: number;
+        timeInSeconds: number;
+        numberOfQuestions: number;
+        sessionToken: string;
+        answeredQuestionIds: string[];
+      }
     ) {
       this.loading = true;
       this.error = null;
@@ -57,6 +63,8 @@ export const useRankingStore = defineStore('ranking', {
           body.correctAnswers = validationParams.correctAnswers;
           body.timeInSeconds = validationParams.timeInSeconds;
           body.numberOfQuestions = validationParams.numberOfQuestions;
+          body.sessionToken = validationParams.sessionToken;
+          body.answeredQuestionIds = validationParams.answeredQuestionIds;
         }
 
         const response = await fetch('/api/ranking', {
