@@ -23,10 +23,11 @@
 5. ビルド（型チェック含む） (`npm run build`)
 
 ### 2. デプロイワークフロー (`.github/workflows/deploy.yml`)
-**main/masterブランチへのpush時のみ**自動実行され、テスト成功後にデプロイします。
+**main/masterブランチへのpush時または手動実行時**に自動実行され、テスト成功後にデプロイします。
 
 **トリガー**:
-- main/masterブランチへのpush時のみ
+- main/masterブランチへのpush時
+- 手動実行: GitHub Actions の UI から実行可能（workflow_dispatch）
 
 **実行内容**:
 1. **testジョブ**: テストを実行（127件）
@@ -207,16 +208,21 @@ jobs:
 ```
 
 #### `.github/workflows/deploy.yml`
-mainブランチへのプッシュ時にテストを実行し、成功後にデプロイするワークフローです。
+mainブランチへのプッシュ時または手動実行時にテストを実行し、成功後にデプロイするワークフローです。
 
 ```yaml
 name: Deploy to Cloudflare Pages
+
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
 
 on:
   push:
     branches:
       - main
       - master
+  workflow_dispatch: # 手動実行を許可
 
 jobs:
   test:

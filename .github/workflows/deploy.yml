@@ -1,10 +1,15 @@
 name: Deploy to Cloudflare Pages
 
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+
 on:
   push:
     branches:
       - main
       - master
+  workflow_dispatch: # 手動実行を許可
 
 jobs:
   test:
