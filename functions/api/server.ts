@@ -168,9 +168,10 @@ app.get('/api/ranking', async (c) => {
     }));
 
     return c.json({ ranking });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Ranking fetch error:', e);
-    return c.json({ error: 'ランキングの取得に失敗しました。', details: e.message }, 500);
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    return c.json({ error: 'ランキングの取得に失敗しました。', details: errorMessage }, 500);
   }
 });
 
@@ -209,9 +210,10 @@ app.post('/api/quiz/start', zValidator('json', quizStartSchema), async (c) => {
       sessionToken,
       message: 'クイズセッションを開始しました',
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Quiz start error:', e);
-    return c.json({ error: 'クイズセッションの開始に失敗しました', details: e.message }, 500);
+    const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+    return c.json({ error: 'クイズセッションの開始に失敗しました', details: errorMessage }, 500);
   }
 });
 
@@ -367,9 +369,10 @@ app.post(
         },
         201
       );
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('Score submission error:', e);
-      return c.json({ error: 'スコアの登録に失敗しました。', details: e.message }, 500);
+      const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+      return c.json({ error: 'スコアの登録に失敗しました。', details: errorMessage }, 500);
     }
   }
 );

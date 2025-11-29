@@ -43,8 +43,12 @@ export const useCountriesStore = defineStore('countries', {
         }
         const data = await response.json();
         this.countries = data;
-      } catch (e: any) {
-        this.error = e.message;
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          this.error = e.message;
+        } else {
+          this.error = 'データの読み込みに失敗しました。';
+        }
       } finally {
         this.loading = false;
       }

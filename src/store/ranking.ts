@@ -34,8 +34,12 @@ export const useRankingStore = defineStore('ranking', {
         }
         const data = await response.json();
         this.ranking = data.ranking;
-      } catch (e: any) {
-        this.error = e.message;
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          this.error = e.message;
+        } else {
+          this.error = '予期せぬエラーが発生しました。';
+        }
       } finally {
         this.loading = false;
       }
@@ -56,7 +60,19 @@ export const useRankingStore = defineStore('ranking', {
       this.loading = true;
       this.error = null;
       try {
-        const body: any = { nickname, score, region, format };
+        interface SubmitScoreBody {
+          nickname: string;
+          score: number;
+          region: string;
+          format: QuizFormat;
+          correctAnswers?: number;
+          timeInSeconds?: number;
+          numberOfQuestions?: number;
+          sessionToken?: string;
+          answeredQuestionIds?: string[];
+        }
+
+        const body: SubmitScoreBody = { nickname, score, region, format };
 
         // Add validation parameters if provided
         if (validationParams) {
@@ -80,8 +96,12 @@ export const useRankingStore = defineStore('ranking', {
         }
         const result = await response.json();
         this.myRank = result.data;
-      } catch (e: any) {
-        this.error = e.message;
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          this.error = e.message;
+        } else {
+          this.error = '予期せぬエラーが発生しました。';
+        }
       } finally {
         this.loading = false;
       }
