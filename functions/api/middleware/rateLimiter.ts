@@ -14,15 +14,7 @@ interface RateLimitEntry {
 // For production, consider using Cloudflare KV for distributed rate limiting
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Cleanup old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key);
-    }
-  }
-}, 60000); // Clean up every minute
+// No global timers in Workers: perform opportunistic cleanup on each request
 
 /**
  * Rate limiting middleware for Hono
@@ -34,7 +26,14 @@ export function rateLimiter(config: RateLimitConfig) {
     const ip =
       c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'unknown';
 
+    // Opportunistic cleanup of expired entries to avoid global timers
     const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (now > entry.resetTime) {
+        rateLimitStore.delete(key);
+      }
+    }
+
     const key = `ratelimit:${ip}`;
 
     let entry = rateLimitStore.get(key);
