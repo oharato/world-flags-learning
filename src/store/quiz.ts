@@ -31,6 +31,7 @@ export const useQuizStore = defineStore('quiz', {
     startTime: 0,
     endTime: 0,
     answerHistory: [] as AnswerRecord[], // 回答履歴を追加
+    sessionToken: '' as string, // セッショントークン
   }),
   actions: {
     generateQuestions() {
@@ -98,12 +99,39 @@ export const useQuizStore = defineStore('quiz', {
       this.numberOfQuestions = numQuestions;
       this.generateQuestions();
       this.answerHistory = []; // クイズ設定時に履歴をリセット
+      this.sessionToken = ''; // セッショントークンをリセット
     },
-    startQuiz() {
+    async startQuiz() {
       this.correctAnswers = 0;
       this.currentQuestionIndex = 0;
       this.startTime = Date.now();
       this.endTime = 0;
+
+      // サーバーにクイズ開始を通知してセッショントークンを取得
+      try {
+        const questionIds = this.questions.map((q) => q.correctAnswer.id);
+        const response = await fetch('/api/quiz/start', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            numberOfQuestions: this.questions.length,
+            region: this.quizRegion,
+            format: this.quizFormat,
+            questionIds,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          this.sessionToken = data.sessionToken;
+        }
+      } catch (error) {
+        // セッショントークンの取得に失敗してもクイズは続行可能
+        // ただしスコア登録時にエラーになる
+        console.error('Failed to start quiz session:', error);
+      }
     },
     answerQuestion(selectedCountryId: string) {
       const currentQuestion = this.questions[this.currentQuestionIndex];
@@ -149,6 +177,9 @@ export const useQuizStore = defineStore('quiz', {
     currentQuestion: (state): Question | null => {
       if (state.questions.length === 0) return null;
       return state.questions[state.currentQuestionIndex] ?? null;
+    },
+    answeredQuestionIds: (state): string[] => {
+      return state.answerHistory.map((record) => record.question.correctAnswer.id);
     },
   },
 });
