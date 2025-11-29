@@ -17,7 +17,7 @@
 
 **実行内容**:
 1. リポジトリのチェックアウト
-2. Node.js 20のセットアップ
+2. Node.js 24のセットアップ
 3. 依存関係のインストール (`npm ci`)
 4. テストの実行 (`npm test`) - 127件のテストを実行
 5. ビルド（型チェック含む） (`npm run build`)
@@ -33,7 +33,7 @@
 1. **testジョブ**: テストを実行（127件）
 2. **deployジョブ**: テストが成功した後にのみ実行（`needs: test`）
    - リポジトリのチェックアウト
-   - Node.js 20のセットアップ
+   - Node.js 24のセットアップ
    - 依存関係のインストール
    - ビルド
    - D1データベースのマイグレーション適用
@@ -48,7 +48,7 @@
 
 **実行内容**:
 1. リポジトリのチェックアウト
-2. Node.js 20のセットアップ
+2. Node.js 24のセットアップ
 3. 依存関係のインストール
 4. 最新の変更を取得（git pull）
 5. 国データ生成スクリプトの実行 (`npm run batch:create-data`)
@@ -194,7 +194,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -235,7 +235,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -258,7 +258,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -313,7 +313,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
