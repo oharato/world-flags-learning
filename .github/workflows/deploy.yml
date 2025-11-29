@@ -1,10 +1,16 @@
 name: Deploy to Cloudflare Pages
 
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+#   VITE_FORMSPREE_ID     - Formspree form ID for contact form (get from https://formspree.io dashboard)
+
 on:
   push:
     branches:
       - main
       - master
+  workflow_dispatch: # 手動実行を許可
 
 jobs:
   test:
@@ -17,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -40,7 +46,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -48,6 +54,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
 
       - name: Apply D1 Migrations
         run: npx wrangler d1 migrations apply world-flags-learning-db --remote

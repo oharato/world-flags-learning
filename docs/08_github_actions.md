@@ -17,22 +17,23 @@
 
 **実行内容**:
 1. リポジトリのチェックアウト
-2. Node.js 20のセットアップ
+2. Node.js 24のセットアップ
 3. 依存関係のインストール (`npm ci`)
 4. テストの実行 (`npm test`) - 127件のテストを実行
 5. ビルド（型チェック含む） (`npm run build`)
 
 ### 2. デプロイワークフロー (`.github/workflows/deploy.yml`)
-**main/masterブランチへのpush時のみ**自動実行され、テスト成功後にデプロイします。
+**main/masterブランチへのpush時または手動実行時**に自動実行され、テスト成功後にデプロイします。
 
 **トリガー**:
-- main/masterブランチへのpush時のみ
+- main/masterブランチへのpush時
+- 手動実行: GitHub Actions の UI から実行可能（workflow_dispatch）
 
 **実行内容**:
 1. **testジョブ**: テストを実行（127件）
 2. **deployジョブ**: テストが成功した後にのみ実行（`needs: test`）
    - リポジトリのチェックアウト
-   - Node.js 20のセットアップ
+   - Node.js 24のセットアップ
    - 依存関係のインストール
    - ビルド
    - D1データベースのマイグレーション適用
@@ -47,7 +48,7 @@
 
 **実行内容**:
 1. リポジトリのチェックアウト
-2. Node.js 20のセットアップ
+2. Node.js 24のセットアップ
 3. 依存関係のインストール
 4. 最新の変更を取得（git pull）
 5. 国データ生成スクリプトの実行 (`npm run batch:create-data`)
@@ -154,7 +155,7 @@ npx wrangler whoami
 3. 左メニューから **Secrets and variables** → **Actions** を選択
 
 #### ステップ 2: Secrets を追加
-**New repository secret** をクリックして、以下の2つを追加:
+**New repository secret** をクリックして、以下の3つを追加:
 
 ##### Secret 1: CLOUDFLARE_API_TOKEN
 - **Name**: `CLOUDFLARE_API_TOKEN`
@@ -164,6 +165,11 @@ npx wrangler whoami
 ##### Secret 2: CLOUDFLARE_ACCOUNT_ID
 - **Name**: `CLOUDFLARE_ACCOUNT_ID`
 - **Value**: ステップ2で取得した Account ID
+- **Add secret** をクリック
+
+##### Secret 3: VITE_FORMSPREE_ID
+- **Name**: `VITE_FORMSPREE_ID`
+- **Value**: Formspreeで作成したフォームのID（[Formspreeダッシュボード](https://formspree.io)から取得）
 - **Add secret** をクリック
 
 ### 4. ワークフローファイルの確認
@@ -193,7 +199,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -207,16 +213,22 @@ jobs:
 ```
 
 #### `.github/workflows/deploy.yml`
-mainブランチへのプッシュ時にテストを実行し、成功後にデプロイするワークフローです。
+mainブランチへのプッシュ時または手動実行時にテストを実行し、成功後にデプロイするワークフローです。
 
 ```yaml
 name: Deploy to Cloudflare Pages
+
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+#   VITE_FORMSPREE_ID     - Formspree form ID for contact form (get from https://formspree.io dashboard)
 
 on:
   push:
     branches:
       - main
       - master
+  workflow_dispatch: # 手動実行を許可
 
 jobs:
   test:
@@ -229,7 +241,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -252,7 +264,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -260,6 +272,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
 
       - name: Apply D1 Migrations
         run: npx wrangler d1 migrations apply world-flags-learning-db --remote
@@ -307,7 +321,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
