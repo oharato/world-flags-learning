@@ -126,6 +126,7 @@
     - [x] wikijs型定義の追加
     - [x] quiz.ts型エラーの修正（null安全性）
     - [x] 'props' is declared but its value is never read. の解消
+    - [x] テスト環境におけるglobal型の解決 (tsconfig.node.jsonにDOMライブラリを追加)
 - [x] 6.7. コードリファクタリング
     - [x] 不要なコメントの削除
     - [x] 共通モックデータの抽出 (src/__tests__/fixtures/countries.ts)
