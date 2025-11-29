@@ -29,6 +29,11 @@ const { t } = useTranslation();
           {{ t.home.viewRanking }}
         </AppButton>
       </router-link>
+      <router-link to="/contact" class="block w-full max-w-sm mx-auto">
+        <AppButton variant="gray" full-width>
+          {{ t.home.contact }}
+        </AppButton>
+      </router-link>
     </div>
   </div>
 </template>

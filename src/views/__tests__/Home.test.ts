@@ -18,6 +18,7 @@ describe('Home.vue', () => {
         { path: '/quiz', component: { template: '<div>Quiz</div>' } },
         { path: '/study', component: { template: '<div>Study</div>' } },
         { path: '/ranking', component: { template: '<div>Ranking</div>' } },
+        { path: '/contact', component: { template: '<div>Contact</div>' } },
       ],
     });
 
@@ -134,9 +135,27 @@ describe('Home.vue', () => {
 
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
     const navLinks = links.filter(
-      (link) => link.props('to') === '/quiz' || link.props('to') === '/study' || link.props('to') === '/ranking'
+      (link) =>
+        link.props('to') === '/quiz' ||
+        link.props('to') === '/study' ||
+        link.props('to') === '/ranking' ||
+        link.props('to') === '/contact'
     );
 
-    expect(navLinks).toHaveLength(3);
+    expect(navLinks).toHaveLength(4);
+  });
+
+  it('お問い合わせへのリンクが正しく表示される', async () => {
+    const wrapper = mount(Home, {
+      global: {
+        plugins: [router],
+      },
+    });
+
+    await router.isReady();
+
+    const links = wrapper.findAllComponents({ name: 'RouterLink' });
+    const contactLink = links.find((link) => link.props('to') === '/contact');
+    expect(contactLink).toBeDefined();
   });
 });

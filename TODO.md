@@ -205,6 +205,13 @@
     - [x] セキュリティヘッダーの追加
     - [x] アクセシビリティの改善（aria-label追加）
     - [x] コンソールログの削除（本番環境向け）
+- [x] 問い合わせフォームの作成
+    - [x] Contact.vue コンポーネントの作成（Formspree対応）
+    - [x] ルーターに追加
+    - [x] 翻訳（i18n）を追加（日本語・英語）
+    - [x] ホームページにリンクを追加
+    - [x] スパム対策（ハニーポットフィールド）
+    - [x] 設定ドキュメントの作成（docs/12_contact_form.md）
 - [x] ログ取得と解析
     - [x] Cloudflare Web Analytics 統合
         - [x] index.html に Cloudflare Web Analytics beacon スクリプトを追加

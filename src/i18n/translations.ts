@@ -9,6 +9,7 @@ export interface Translations {
     startQuiz: string;
     study: string;
     viewRanking: string;
+    contact: string;
   };
   quizSetup: {
     title: string;
@@ -109,6 +110,25 @@ export interface Translations {
     southAmerica: string;
     oceania: string;
   };
+  contact: {
+    title: string;
+    description: string;
+    name: string;
+    namePlaceholder: string;
+    email: string;
+    emailPlaceholder: string;
+    message: string;
+    messagePlaceholder: string;
+    submit: string;
+    submitting: string;
+    nameRequired: string;
+    emailRequired: string;
+    emailInvalid: string;
+    messageRequired: string;
+    submitError: string;
+    successTitle: string;
+    successMessage: string;
+  };
   privacyPolicy: {
     title: string;
     lastUpdated: string;
@@ -152,6 +172,7 @@ export const translations: Record<Language, Translations> = {
       startQuiz: 'クイズに挑戦する',
       study: '国旗を学習する',
       viewRanking: 'ランキングを見る',
+      contact: 'お問い合わせ',
     },
     quizSetup: {
       title: 'クイズ設定',
@@ -251,6 +272,25 @@ export const translations: Record<Language, Translations> = {
       southAmerica: '南アメリカ',
       oceania: 'オセアニア',
     },
+    contact: {
+      title: 'お問い合わせ',
+      description: 'ご質問やご意見がありましたら、以下のフォームからお気軽にお問い合わせください。',
+      name: 'お名前',
+      namePlaceholder: 'お名前を入力',
+      email: 'メールアドレス',
+      emailPlaceholder: 'メールアドレスを入力',
+      message: 'メッセージ',
+      messagePlaceholder: 'お問い合わせ内容を入力',
+      submit: '送信',
+      submitting: '送信中...',
+      nameRequired: 'お名前を入力してください。',
+      emailRequired: 'メールアドレスを入力してください。',
+      emailInvalid: '有効なメールアドレスを入力してください。',
+      messageRequired: 'メッセージを入力してください。',
+      submitError: '送信に失敗しました。しばらくしてから再度お試しください。',
+      successTitle: '送信完了',
+      successMessage: 'お問い合わせありがとうございます。内容を確認後、ご連絡いたします。',
+    },
     privacyPolicy: {
       title: 'プライバシーポリシー',
       lastUpdated: '最終更新日',
@@ -298,6 +338,7 @@ export const translations: Record<Language, Translations> = {
       startQuiz: 'Start Quiz',
       study: 'Study Flags',
       viewRanking: 'View Ranking',
+      contact: 'Contact Us',
     },
     quizSetup: {
       title: 'Quiz Setup',
@@ -396,6 +437,25 @@ export const translations: Record<Language, Translations> = {
       northAmerica: 'North America',
       southAmerica: 'South America',
       oceania: 'Oceania',
+    },
+    contact: {
+      title: 'Contact Us',
+      description: 'If you have any questions or feedback, please feel free to contact us using the form below.',
+      name: 'Name',
+      namePlaceholder: 'Enter your name',
+      email: 'Email',
+      emailPlaceholder: 'Enter your email',
+      message: 'Message',
+      messagePlaceholder: 'Enter your message',
+      submit: 'Send',
+      submitting: 'Sending...',
+      nameRequired: 'Please enter your name.',
+      emailRequired: 'Please enter your email.',
+      emailInvalid: 'Please enter a valid email address.',
+      messageRequired: 'Please enter your message.',
+      submitError: 'Failed to send. Please try again later.',
+      successTitle: 'Message Sent',
+      successMessage: 'Thank you for your message. We will get back to you soon.',
     },
     privacyPolicy: {
       title: 'Privacy Policy',
