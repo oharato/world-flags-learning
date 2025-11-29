@@ -159,6 +159,7 @@ export interface Translations {
   };
   footer: {
     privacyPolicy: string;
+    contact: string;
   };
 }
 
@@ -327,6 +328,7 @@ export const translations: Record<Language, Translations> = {
     },
     footer: {
       privacyPolicy: 'プライバシーポリシー',
+      contact: 'お問い合わせ',
     },
   },
   en: {
@@ -493,6 +495,7 @@ export const translations: Record<Language, Translations> = {
     },
     footer: {
       privacyPolicy: 'Privacy Policy',
+      contact: 'Contact Us',
     },
   },
 };

@@ -4,7 +4,7 @@ import { useTranslation } from '../composables/useTranslation';
 const { t } = useTranslation();
 
 // Privacy policy last updated date - update this when the policy changes
-const PRIVACY_POLICY_LAST_UPDATED = '2025-06-09';
+const PRIVACY_POLICY_LAST_UPDATED = '2025-11-29';
 </script>
 
 <template>

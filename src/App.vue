@@ -13,6 +13,10 @@ const { t } = useTranslation();
       <router-link to="/privacy-policy" class="hover:underline">
         {{ t.footer.privacyPolicy }}
       </router-link>
+      <span class="mx-2">|</span>
+      <router-link to="/contact" class="hover:underline">
+        {{ t.footer.contact }}
+      </router-link>
     </footer>
   </div>
 </template>
