@@ -135,27 +135,9 @@ describe('Home.vue', () => {
 
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
     const navLinks = links.filter(
-      (link) =>
-        link.props('to') === '/quiz' ||
-        link.props('to') === '/study' ||
-        link.props('to') === '/ranking' ||
-        link.props('to') === '/contact'
+      (link) => link.props('to') === '/quiz' || link.props('to') === '/study' || link.props('to') === '/ranking'
     );
 
-    expect(navLinks).toHaveLength(4);
-  });
-
-  it('お問い合わせへのリンクが正しく表示される', async () => {
-    const wrapper = mount(Home, {
-      global: {
-        plugins: [router],
-      },
-    });
-
-    await router.isReady();
-
-    const links = wrapper.findAllComponents({ name: 'RouterLink' });
-    const contactLink = links.find((link) => link.props('to') === '/contact');
-    expect(contactLink).toBeDefined();
+    expect(navLinks).toHaveLength(3);
   });
 });

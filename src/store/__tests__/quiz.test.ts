@@ -1,11 +1,23 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useCountriesStore } from '../countries';
 import { useQuizStore } from '../quiz';
 
 describe('Quiz Store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+
+    // Mock global fetch
+    global.fetch = vi.fn(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ sessionToken: 'test-session-token' }),
+      } as Response)
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('初期状態', () => {
