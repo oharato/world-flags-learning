@@ -155,7 +155,7 @@ npx wrangler whoami
 3. 左メニューから **Secrets and variables** → **Actions** を選択
 
 #### ステップ 2: Secrets を追加
-**New repository secret** をクリックして、以下の2つを追加:
+**New repository secret** をクリックして、以下の3つを追加:
 
 ##### Secret 1: CLOUDFLARE_API_TOKEN
 - **Name**: `CLOUDFLARE_API_TOKEN`
@@ -165,6 +165,11 @@ npx wrangler whoami
 ##### Secret 2: CLOUDFLARE_ACCOUNT_ID
 - **Name**: `CLOUDFLARE_ACCOUNT_ID`
 - **Value**: ステップ2で取得した Account ID
+- **Add secret** をクリック
+
+##### Secret 3: VITE_FORMSPREE_ID
+- **Name**: `VITE_FORMSPREE_ID`
+- **Value**: Formspreeで作成したフォームのID（[Formspreeダッシュボード](https://formspree.io)から取得）
 - **Add secret** をクリック
 
 ### 4. ワークフローファイルの確認
@@ -216,6 +221,7 @@ name: Deploy to Cloudflare Pages
 # Required GitHub Secrets:
 #   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
 #   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+#   VITE_FORMSPREE_ID     - Formspree form ID for contact form (get from https://formspree.io dashboard)
 
 on:
   push:
@@ -266,6 +272,8 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
 
       - name: Apply D1 Migrations
         run: npx wrangler d1 migrations apply world-flags-learning-db --remote
