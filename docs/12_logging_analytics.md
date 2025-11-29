@@ -16,26 +16,54 @@ Cloudflare Web Analytics は、プライバシーを重視したウェブサイ�
 - 匿名化された集計データのみを記録
 - SPAの画面遷移を自動追跡
 
-### 1.2. 導入方法
+### 1.2. トークンの取得方法
 
-1. Cloudflare ダッシュボードにログイン
-2. **Analytics & Logs** > **Web Analytics** に移動
-3. **Add a site** をクリック
-4. サイトURL（例: `world-flags-learning.pages.dev`）を入力
-5. 生成されたトークンをコピー
+Cloudflare Web Analytics を使用するには、サイト固有のトークンを取得する必要があります。
 
-### 1.3. 設定
+#### 手順
 
-`index.html` にビーコンスクリプトが埋め込まれています:
+1. [Cloudflare ダッシュボード](https://dash.cloudflare.com/) にログイン
+
+2. 左側メニューから **Analytics & Logs** > **Web Analytics** を選択
+
+3. **Add a site** ボタンをクリック
+
+4. サイト情報を入力:
+   - **Hostname**: サイトのドメイン名を入力（例: `world-flags-learning.pages.dev`）
+   - **Enable Automatic Setup**: Cloudflare でプロキシされているサイトの場合は有効化できます
+
+5. **Done** をクリックすると、以下のようなスクリプトタグが表示されます:
+   ```html
+   <script defer src='https://static.cloudflareinsights.com/beacon.min.js' 
+           data-cf-beacon='{"token": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'></script>
+   ```
+
+6. `"token":` の後に続く32文字の英数字がトークンです。この値をコピーしてください。
+
+#### 既存サイトのトークン確認方法
+
+すでに登録済みのサイトのトークンを確認する場合:
+
+1. **Analytics & Logs** > **Web Analytics** に移動
+2. 対象のサイトをクリック
+3. 右上の **⚙️ 設定アイコン** または **Manage site** をクリック
+4. **JS Snippet** セクションでトークンを確認できます
+
+#### トークンの設定
+
+取得したトークンを `index.html` の以下の箇所に設定します:
 
 ```html
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js" 
-        data-cf-beacon='{"token": "CLOUDFLARE_ANALYTICS_TOKEN"}'></script>
+        data-cf-beacon='{"token": "ここに取得したトークンを貼り付け"}'></script>
 ```
 
-**注意:** `CLOUDFLARE_ANALYTICS_TOKEN` を実際のトークンに置き換えてください。
+**注意事項:**
+- トークンはサイトごとに一意です
+- トークンは公開されても問題ありません（データの書き込みのみに使用されます）
+- トークンを変更すると、過去のデータとの連続性が失われます
 
-### 1.4. 収集されるデータ
+### 1.3. 収集されるデータ
 
 - ページビュー数
 - ユニーク訪問者数
@@ -45,7 +73,7 @@ Cloudflare Web Analytics は、プライバシーを重視したウェブサイ�
 - ブラウザ/OS情報
 - デバイスタイプ
 
-### 1.5. SPAサポート
+### 1.4. SPAサポート
 
 Vue Router を使用した SPA の画面遷移は、Cloudflare Web Analytics が自動的に検出し追跡します。History API を使用したルーティング（history モード）に対応しています。
 
