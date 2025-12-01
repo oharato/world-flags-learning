@@ -1,4 +1,9 @@
-name: Run Tests
+name: Test and Deploy Preview
+
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+#   VITE_FORMSPREE_ID     - Formspree form ID for contact form (get from https://formspree.io dashboard)
 
 on:
   pull_request:
@@ -28,3 +33,84 @@ jobs:
 
       - name: Build (includes type check)
         run: npm run build
+
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    name: Deploy Preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
+
+      - name: Deploy to Cloudflare Pages (Preview)
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=world-flags-learning --branch=${{ github.head_ref }}
+
+      - name: Comment Preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.deployment-url }}';
+            const branchName = '${{ github.head_ref }}';
+            
+            // Find existing preview comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🚀 Preview deployment is ready!')
+            );
+            
+            const commentBody = `## 🚀 Preview deployment is ready!
+
+            **Branch:** \`${branchName}\`
+            **Preview URL:** ${deploymentUrl}
+
+            This preview will be updated with each commit to this PR.
+            
+            ---
+            *Deployed to Cloudflare Pages*`;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

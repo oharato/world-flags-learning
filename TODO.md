@@ -168,6 +168,11 @@
     - [x] docs/08_github_actions.md の作成
     - [x] README.md に自動デプロイ手順を追加
     - [x] wrangler pages deploy コマンドへの移行（非推奨警告の解消）
+    - [x] プルリクエスト時のプレビューデプロイ機能
+        - [x] test.yml にプレビューデプロイジョブを追加
+        - [x] Cloudflare Pages へのブランチ別デプロイ
+        - [x] PRへのプレビューURLコメント自動投稿
+        - [x] docs/08_github_actions.md のドキュメント更新
 - [x] 7.7. ドキュメントの更新
     - [x] 04_api_spec.md: スコア登録APIに region と format パラメータを追加
     - [x] 05_technical_specification.md: データベーススキーマとマイグレーション管理の更新

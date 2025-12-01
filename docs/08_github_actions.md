@@ -7,8 +7,8 @@
 
 本プロジェクトでは、以下の3つのGitHub Actionsワークフローを使用しています:
 
-### 1. テストワークフロー (`.github/workflows/test.yml`)
-**プルリクエスト時のみ**自動実行され、コードレビュー前に品質を確認します。
+### 1. テスト・プレビューデプロイワークフロー (`.github/workflows/test.yml`)
+**プルリクエスト時のみ**自動実行され、コードレビュー前に品質を確認し、プレビュー環境にデプロイします。
 
 **トリガー**:
 - プルリクエストがmain/masterブランチに対して作成された時（`opened`）
@@ -16,11 +16,35 @@
 - プルリクエストが再オープンされた時（`reopened`）
 
 **実行内容**:
-1. リポジトリのチェックアウト
-2. Node.js 24のセットアップ
-3. 依存関係のインストール (`npm ci`)
-4. テストの実行 (`npm test`) - 127件のテストを実行
-5. ビルド（型チェック含む） (`npm run build`)
+1. **testジョブ**:
+   - リポジトリのチェックアウト
+   - Node.js 24のセットアップ
+   - 依存関係のインストール (`npm ci`)
+   - テストの実行 (`npm test`)
+   - ビルド（型チェック含む） (`npm run build`)
+2. **deploy-previewジョブ**（testジョブ成功後に実行）:
+   - リポジトリのチェックアウト
+   - Node.js 24のセットアップ
+   - 依存関係のインストール
+   - ビルド
+   - Cloudflare Pagesへのプレビューデプロイ（ブランチ名でデプロイ）
+   - PRにプレビューURLをコメント
+
+**プレビューURL形式**:
+- `https://<branch-name>.world-flags-learning.pages.dev`
+- ブランチ名に基づいた一意のURLでアクセス可能
+
+**ブランチ名の変換ルール（Cloudflareによる自動変換）**:
+- すべての非英数字文字（スラッシュ `/`、ドット `.`、アンダースコア `_` など）はハイフン `-` に置換される
+- 大文字は小文字に変換される
+- DNSの制約により63文字以内に制限される（超過した場合は切り詰められる）
+
+**例**:
+| ブランチ名 | プレビューURL |
+|-----------|---------------|
+| `feature/new-ui` | `https://feature-new-ui.world-flags-learning.pages.dev` |
+| `copilot/add-preview-feature` | `https://copilot-add-preview-feature.world-flags-learning.pages.dev` |
+| `fix.api.bug` | `https://fix-api-bug.world-flags-learning.pages.dev` |
 
 ### 2. デプロイワークフロー (`.github/workflows/deploy.yml`)
 **main/masterブランチへのpush時または手動実行時**に自動実行され、テスト成功後にデプロイします。
@@ -72,10 +96,14 @@
 1. フィーチャーブランチで開発
    └─ ローカル: pre-commitフック（format → lint → test）
 2. PR作成
-   └─ GitHub Actions: test.yml実行 ✓（レビュー前の品質確認）
+   └─ GitHub Actions: test.yml実行
+      ├─ テスト ✓（レビュー前の品質確認）
+      └─ プレビューデプロイ → PRにプレビューURLをコメント
 3. 追加修正をpush
-   └─ GitHub Actions: test.yml再実行 ✓（変更の品質確認）
-4. コードレビュー・承認
+   └─ GitHub Actions: test.yml再実行
+      ├─ テスト ✓（変更の品質確認）
+      └─ プレビューデプロイ更新 → PRコメント更新
+4. コードレビュー・承認（プレビューURLで動作確認可能）
 5. PRマージ（main/masterへのpush）
    └─ GitHub Actions: deploy.yml実行
       ├─ テスト ✓（最終確認）
@@ -95,7 +123,7 @@
 
 以前は`test.yml`がPR時とpush時の両方で実行されていましたが、現在は以下のように最適化されています:
 
-- **test.yml**: PR時のみ（コードレビュー前の品質チェック）
+- **test.yml**: PR時のみ（コードレビュー前の品質チェック + プレビューデプロイ）
 - **deploy.yml**: main/masterへのpush時のみ（デプロイ前の最終チェック）
 
 これにより、main/masterブランチへのpush時にテストが**1回だけ**実行され、無駄な実行を防止しています。
@@ -103,12 +131,13 @@
 ## ワークフローの利点
 
 - **早期品質チェック**: PR作成時に自動テスト実行、レビュー前に問題を発見
-- **効率的なレビュー**: テスト結果を確認してからコードレビューが可能
+- **プレビュー環境**: PRごとに一意のプレビューURLが生成され、レビュー前に動作確認が可能
+- **効率的なレビュー**: テスト結果とプレビューURLを確認してからコードレビューが可能
 - **自動デプロイ**: mainブランチへのマージ時に自動でデプロイ
-- **安全性**: テストが失敗した場合、デプロイは実行されない
+- **安全性**: テストが失敗した場合、デプロイ（プレビュー・本番ともに）は実行されない
 - **テスト重複の防止**: main/masterへのpush時にテストは1回のみ実行
 - **ブランチ保護**: GitHubのブランチ保護ルールと組み合わせることで、テスト失敗時のマージを防止
-- **多層防御**: ローカルpre-commit → PR時テスト → デプロイ前テストの3段階チェック
+- **多層防御**: ローカルpre-commit → PR時テスト+プレビュー → デプロイ前テストの3段階チェック
 - **データの自動更新**: 定期的または手動で国データを最新の状態に保つことが可能
 
 ## 前提条件
@@ -174,13 +203,18 @@ npx wrangler whoami
 
 ### 4. ワークフローファイルの確認
 
-本プロジェクトには以下の2つのワークフローファイルが存在します:
+本プロジェクトには以下の3つのワークフローファイルが存在します:
 
 #### `.github/workflows/test.yml`
-プルリクエスト時とプッシュ時にテストを実行するワークフローです。
+プルリクエスト時にテストを実行し、プレビュー環境にデプロイするワークフローです。
 
 ```yaml
-name: Run Tests
+name: Test and Deploy Preview
+
+# Required GitHub Secrets:
+#   CLOUDFLARE_API_TOKEN  - Cloudflare API token with "Cloudflare Pages: Edit" and "D1: Edit" permissions
+#   CLOUDFLARE_ACCOUNT_ID - Cloudflare Account ID (found in dashboard or via `npx wrangler whoami`)
+#   VITE_FORMSPREE_ID     - Formspree form ID for contact form (get from https://formspree.io dashboard)
 
 on:
   pull_request:
@@ -210,6 +244,87 @@ jobs:
 
       - name: Build (includes type check)
         run: npm run build
+
+  deploy-preview:
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      deployments: write
+      pull-requests: write
+    name: Deploy Preview
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          VITE_FORMSPREE_ID: ${{ secrets.VITE_FORMSPREE_ID }}
+
+      - name: Deploy to Cloudflare Pages (Preview)
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=world-flags-learning --branch=${{ github.head_ref }}
+
+      - name: Comment Preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deploymentUrl = '${{ steps.deploy.outputs.deployment-url }}';
+            const branchName = '${{ github.head_ref }}';
+            
+            // Find existing preview comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🚀 Preview deployment is ready!')
+            );
+            
+            const commentBody = `## 🚀 Preview deployment is ready!
+
+            **Branch:** \`${branchName}\`
+            **Preview URL:** ${deploymentUrl}
+
+            This preview will be updated with each commit to this PR.
+            
+            ---
+            *Deployed to Cloudflare Pages*`;
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
 ```
 
 #### `.github/workflows/deploy.yml`
@@ -416,18 +531,25 @@ git push origin feature/new-feature
 # GitHubでプルリクエストを作成
 ```
 
-プルリクエストを作成すると、自動的に `Run Tests` ワークフローが実行されます:
+プルリクエストを作成すると、自動的に `Test and Deploy Preview` ワークフローが実行されます:
 1. GitHub リポジトリの **Pull requests** タブを開く
 2. 作成したプルリクエストをクリック
-3. **Checks** タブで「Run Tests」ワークフローが実行されていることを確認
+3. **Checks** タブで「Test and Deploy Preview」ワークフローが実行されていることを確認
 4. 緑色のチェックマーク ✅ が表示されれば成功
+5. PRのコメント欄にプレビューURLが自動的に投稿されます
 
-#### ステップ 2: mainブランチへのマージ
+#### ステップ 2: プレビュー環境の確認
+テスト成功後、以下のプレビュー機能が利用できます:
+1. PRのコメント欄に「🚀 Preview deployment is ready!」というコメントが投稿される
+2. コメント内のプレビューURLをクリックして、変更内容を確認
+3. PRに追加コミットをpushすると、プレビュー環境も自動的に更新される
+
+#### ステップ 3: mainブランチへのマージ
 プルリクエストをマージすると、以下が自動実行されます:
-1. `Run Tests` ワークフローが実行される
-2. テストが成功すると `Deploy to Cloudflare Pages` ワークフローが実行される
+1. `Deploy to Cloudflare Pages` ワークフローが実行される
+2. テストが成功すると本番環境にデプロイされる
 
-#### ステップ 3: デプロイを確認
+#### ステップ 4: 本番デプロイを確認
 1. GitHub リポジトリの **Actions** タブを開く
 2. 「Deploy to Cloudflare Pages」ワークフローが実行されていることを確認
 3. 緑色のチェックマーク ✅ が表示されれば成功
@@ -475,6 +597,22 @@ gh secret set CLOUDFLARE_ACCOUNT_ID --body "your-account-id-here"
 - `projectName: world-flags-learning` がワークフローファイルに正しく設定されているか確認
 - Cloudflare Pages で同じ名前のプロジェクトが存在するか確認
 
+### プレビューデプロイのトラブルシューティング
+
+#### プレビューURLがPRにコメントされない
+- `GITHUB_TOKEN` がワークフローで正しく使用されているか確認
+- ワークフローに `pull-requests: write` 権限が設定されているか確認
+- Actions タブでワークフローのログを確認し、エラーがないか確認
+
+#### プレビュー環境にアクセスできない
+- プレビューURLの形式を確認: `https://<branch-name>.world-flags-learning.pages.dev`
+- ブランチ名に特殊文字が含まれている場合、URLが正しくエンコードされているか確認
+- Cloudflare ダッシュボードでプレビューデプロイが成功しているか確認
+
+#### プレビュー環境でAPIが動作しない
+- プレビュー環境はD1データベースのマイグレーションを実行しないため、新しいスキーマ変更がある場合は本番環境にマージ後に確認してください
+- プレビュー環境でもD1バインディングは本番と同じ設定を使用します
+
 ### ビルドエラー
 - ローカルで `npm run build` が成功するか確認
 - `package.json` の依存関係が正しく記載されているか確認
@@ -511,7 +649,7 @@ npm run deploy
 3. **pre-commitフック**が自動実行:
    - フォーマット（Biome）
    - リンター（Biome）
-   - テスト（127件）
+   - テスト
    - lint-staged
 4. すべて成功した場合のみコミット可能
 
@@ -519,21 +657,25 @@ npm run deploy
 1. フィーチャーブランチをpush
 2. GitHubでプルリクエストを作成
 3. **GitHub Actions（test.yml）**が自動実行:
-   - テスト（127件）
+   - テスト
    - ビルド（型チェック含む）
+   - **プレビュー環境へのデプロイ**
+   - **PRへのプレビューURLコメント投稿**
 4. テストが失敗した場合、**レビュー前に問題を検出**
-5. テスト成功後、レビュアーは安心してコードレビュー可能
+5. テスト成功後、**プレビューURLで動作確認**可能
+6. レビュアーはプレビュー環境で変更を確認してからコードレビュー可能
 
 ### プルリクエスト更新時
 1. レビューコメントに基づいて修正
 2. フィーチャーブランチに追加コミットをpush
 3. **GitHub Actions（test.yml）**が再度自動実行
 4. 修正内容の品質を確認
+5. **プレビュー環境も自動的に更新**
 
 ### mainブランチへのマージ時
 1. プルリクエストがマージされる（main/masterへのpush）
 2. **GitHub Actions（deploy.yml）**が自動実行:
-   - **testジョブ**: テスト（127件）を実行（最終確認）
+   - **testジョブ**: テストを実行（最終確認）
    - **deployジョブ**: テスト成功後のみ実行
      - ビルド
      - D1データベースのマイグレーション適用
@@ -550,7 +692,8 @@ npm run deploy
 レイヤー2: CI（test.yml）
   └─ PR作成・更新時に自動チェック
   └─ レビュー前に品質確認
-  └─ テスト結果がPRページに表示
+  └─ プレビュー環境で動作確認
+  └─ テスト結果とプレビューURLがPRページに表示
 
 レイヤー3: CD（deploy.yml）
   └─ マージ後の最終チェック
@@ -560,9 +703,10 @@ npm run deploy
 
 これにより、以下が実現されます:
 - **早期問題発見**: コミット時、PR作成時、デプロイ前の3段階で品質チェック
-- **効率的なレビュー**: テスト済みコードのみレビュー対象
+- **プレビュー環境**: PRごとに一意のURLでレビュー前に動作確認が可能
+- **効率的なレビュー**: テスト済みコードとプレビュー環境でレビュー
 - **mainブランチの保護**: 壊れたコードがmainブランチにマージされるのを防ぐ
 - **安全なデプロイ**: テストが成功した場合のみ本番環境に反映
 - **手動作業の削減**: デプロイミスの削減と作業効率化
 - **テスト重複の防止**: 各段階で1回ずつ、無駄なく実行
-- **CI/CDパイプライン**: テスト→ビルド→デプロイの完全自動化
+- **CI/CDパイプライン**: テスト→プレビューデプロイ→本番デプロイの完全自動化
