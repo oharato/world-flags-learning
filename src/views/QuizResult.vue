@@ -33,7 +33,8 @@ const submitToRanking = async () => {
     sessionToken: quizStore.sessionToken,
     answeredQuestionIds: quizStore.answeredQuestionIds,
   });
-  if (!rankingStore.error) {
+  // 成功時は myRank がセットされ、error は null になる
+  if (!rankingStore.error && rankingStore.myRank) {
     isSubmitted.value = true;
   }
 };
@@ -84,7 +85,7 @@ const getRegionLabel = (region: string) => {
     <h2 class="text-4xl font-bold my-8">{{ t.quizResult.title }}</h2>
 
     <!-- エラーメッセージ表示 -->
-    <div v-if="rankingStore.error" class="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg text-red-700">
+    <div v-if="rankingStore.error" id="ranking-error" role="alert" class="mb-6 p-4 bg-red-50 border border-red-300 rounded-lg text-red-700">
       <p class="font-semibold">ランキング登録エラー</p>
       <p class="text-sm">{{ rankingStore.error }}</p>
     </div>
@@ -160,10 +161,10 @@ const getRegionLabel = (region: string) => {
 
     <div class="mt-10 space-y-4">
       <!-- ランキング登録ボタン -->
-      <div v-if="isSubmitted" class="max-w-sm mx-auto p-4 bg-green-50 border border-green-300 rounded-lg text-green-700 text-center">
+      <div v-if="isSubmitted" role="status" aria-live="polite" class="max-w-sm mx-auto p-4 bg-green-50 border border-green-300 rounded-lg text-green-700 text-center">
         <p class="font-semibold">{{ t.quizResult.submitted }}</p>
       </div>
-      <AppButton v-else variant="primary" full-width :disabled="rankingStore.loading" @click="submitToRanking" class="max-w-sm mx-auto text-lg">
+      <AppButton v-else variant="primary" full-width :disabled="rankingStore.loading" :aria-describedby="rankingStore.error ? 'ranking-error' : undefined" @click="submitToRanking" class="max-w-sm mx-auto text-lg">
         {{ rankingStore.loading ? t.quizResult.submitting : t.quizResult.submitToRanking }}
       </AppButton>
 
