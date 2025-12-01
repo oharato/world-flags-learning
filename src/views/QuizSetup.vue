@@ -112,6 +112,9 @@ const clearNicknameError = () => {
         <p v-if="nicknameError" class="mt-1 text-sm text-red-600">
           {{ nicknameError }}
         </p>
+        <p v-else class="mt-1 text-sm text-gray-500">
+          {{ t.quizSetup.nicknameHint }}
+        </p>
       </div>
 
       <QuizFormatSelector 
