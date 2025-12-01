@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://world-flags-learning.pages.dev/sitemap.xml
+Sitemap: https://world-flags-learning.ohchans.com/sitemap.xml

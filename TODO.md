@@ -206,6 +206,7 @@
     - [x] セキュリティヘッダーの追加
     - [x] アクセシビリティの改善（aria-label追加）
     - [x] コンソールログの削除（本番環境向け）
+    - [x] 本番URLの統一（開発用URLを https://world-flags-learning.ohchans.com に統一）
 - [x] 問い合わせフォームの作成
     - [x] Contact.vue コンポーネントの作成（Formspree対応）
     - [x] ルーターに追加
