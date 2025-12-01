@@ -138,19 +138,19 @@ Service Worker登録の失敗を静かに処理し、ユーザー体験を妨げ
 
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://world-flags-learning.pages.dev/">
+<meta property="og:url" content="https://world-flags-learning.ohchans.com/">
 <meta property="og:title" content="国旗学習アプリ - 世界の国旗を楽しく学ぼう">
 <meta property="og:description" content="198カ国の国旗を楽しく学べるクイズアプリ...">
-<meta property="og:image" content="https://world-flags-learning.pages.dev/favicon.svg">
+<meta property="og:image" content="https://world-flags-learning.ohchans.com/favicon.svg">
 
 <!-- Twitter -->
 <meta property="twitter:card" content="summary_large_image">
 <meta property="twitter:title" content="国旗学習アプリ - 世界の国旗を楽しく学ぼう">
 <meta property="twitter:description" content="198カ国の国旗を楽しく学べるクイズアプリ...">
-<meta property="twitter:image" content="https://world-flags-learning.pages.dev/favicon.svg">
+<meta property="twitter:image" content="https://world-flags-learning.ohchans.com/favicon.svg">
 
 <!-- Canonical URL -->
-<link rel="canonical" href="https://world-flags-learning.pages.dev/">
+<link rel="canonical" href="https://world-flags-learning.ohchans.com/">
 ```
 
 #### 4.2 robots.txt
@@ -160,7 +160,7 @@ Service Worker登録の失敗を静かに処理し、ユーザー体験を妨げ
 User-agent: *
 Allow: /
 
-Sitemap: https://world-flags-learning.pages.dev/sitemap.xml
+Sitemap: https://world-flags-learning.ohchans.com/sitemap.xml
 ```
 
 すべての検索エンジンにクロールを許可。
@@ -174,7 +174,7 @@ Sitemap: https://world-flags-learning.pages.dev/sitemap.xml
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://world-flags-learning.pages.dev/</loc>
+    <loc>https://world-flags-learning.ohchans.com/</loc>
     <priority>1.0</priority>
   </url>
   <!-- 他のページ... -->

@@ -29,7 +29,7 @@ Cloudflare Web Analytics を使用するには、サイト固有のトークン�
 3. **Add a site** ボタンをクリック
 
 4. サイト情報を入力:
-   - **Hostname**: サイトのドメイン名を入力（例: `world-flags-learning.pages.dev`）
+   - **Hostname**: サイトのドメイン名を入力（例: `world-flags-learning.ohchans.com`）
    - **Enable Automatic Setup**: Cloudflare でプロキシされているサイトの場合は有効化できます
 
 5. **Done** をクリックすると、以下のようなスクリプトタグが表示されます:
@@ -196,7 +196,7 @@ app.use('*', async (c, next) => {
   "stack": "TypeError: Cannot read property...",
   "component": "QuizPlay",
   "info": "render",
-  "url": "https://world-flags-learning.pages.dev/quiz/play",
+  "url": "https://world-flags-learning.ohchans.com/quiz/play",
   "userAgent": "Mozilla/5.0..."
 }
 ```
