@@ -34,6 +34,18 @@
 - `https://<branch-name>.world-flags-learning.pages.dev`
 - ブランチ名に基づいた一意のURLでアクセス可能
 
+**ブランチ名の変換ルール（Cloudflareによる自動変換）**:
+- すべての非英数字文字（スラッシュ `/`、ドット `.`、アンダースコア `_` など）はハイフン `-` に置換される
+- 大文字は小文字に変換される
+- DNSの制約により63文字以内に制限される（超過した場合は切り詰められる）
+
+**例**:
+| ブランチ名 | プレビューURL |
+|-----------|---------------|
+| `feature/new-ui` | `https://feature-new-ui.world-flags-learning.pages.dev` |
+| `copilot/add-preview-feature` | `https://copilot-add-preview-feature.world-flags-learning.pages.dev` |
+| `fix.api.bug` | `https://fix-api-bug.world-flags-learning.pages.dev` |
+
 ### 2. デプロイワークフロー (`.github/workflows/deploy.yml`)
 **main/masterブランチへのpush時または手動実行時**に自動実行され、テスト成功後にデプロイします。
 
