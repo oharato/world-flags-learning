@@ -15,6 +15,7 @@ export interface Translations {
     title: string;
     nickname: string;
     nicknamePlaceholder: string;
+    nicknameHint: string;
     quizFormat: string;
     flagToName: string;
     nameToFlag: string;
@@ -64,6 +65,9 @@ export interface Translations {
     unknown: string;
     goToRanking: string;
     backToTop: string;
+    submitToRanking: string;
+    submitting: string;
+    submitted: string;
   };
   ranking: {
     title: string;
@@ -179,6 +183,7 @@ export const translations: Record<Language, Translations> = {
       title: 'クイズ設定',
       nickname: 'ニックネーム（最大20文字）',
       nicknamePlaceholder: 'ニックネームを入力',
+      nicknameHint: 'ランキング画面で使用されます',
       quizFormat: 'クイズ形式',
       flagToName: '国旗 → 国名',
       nameToFlag: '国名 → 国旗',
@@ -227,6 +232,9 @@ export const translations: Record<Language, Translations> = {
       unknown: '不明',
       goToRanking: 'ランキングを見る',
       backToTop: 'トップに戻る',
+      submitToRanking: 'ランキングに登録する',
+      submitting: '登録中...',
+      submitted: 'ランキングに登録しました',
     },
     ranking: {
       title: 'ランキング',
@@ -346,6 +354,7 @@ export const translations: Record<Language, Translations> = {
       title: 'Quiz Setup',
       nickname: 'Nickname (max 20 characters)',
       nicknamePlaceholder: 'Enter nickname',
+      nicknameHint: 'Used for the ranking display',
       quizFormat: 'Quiz Format',
       flagToName: 'Flag -> Name',
       nameToFlag: 'Name -> Flag',
@@ -394,6 +403,9 @@ export const translations: Record<Language, Translations> = {
       unknown: 'Unknown',
       goToRanking: 'View Ranking',
       backToTop: 'Back to Home',
+      submitToRanking: 'Submit to Ranking',
+      submitting: 'Submitting...',
+      submitted: 'Submitted to Ranking',
     },
     ranking: {
       title: 'Ranking',
