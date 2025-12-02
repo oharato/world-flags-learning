@@ -6,33 +6,23 @@ export function useCountryNameMap() {
   const countryNameMap = ref<Map<string, string>>(new Map());
   const isLoaded = ref(false);
 
-  const loadCountryNameMap = async (geoJsonCountryNames: string[]) => {
+  const loadCountryNameMap = async (_geoJsonCountryNames: string[]) => {
     if (isLoaded.value) return;
 
-    // Load localized country names
-    await countriesStore.fetchCountries();
+    try {
+      // Load the pre-generated country name lookup
+      const lookupResponse = await fetch('/country-names-lookup.json');
+      if (lookupResponse.ok) {
+        const lookup: Record<string, { ja: string; en: string }> = await lookupResponse.json();
 
-    // Create mapping from English names (in countries.en.json) to current locale names
-    const enResponse = await fetch('/countries.en.json');
-    if (enResponse.ok) {
-      const enData = await enResponse.json();
-
-      // Map GeoJSON names to localized names
-      for (const geoName of geoJsonCountryNames) {
-        const localizedCountry = countriesStore.countries.find((c) => {
-          const enCountry = enData.find(
-            (en: any) =>
-              en.name.toLowerCase() === geoName.toLowerCase() ||
-              en.name.toLowerCase().includes(geoName.toLowerCase()) ||
-              geoName.toLowerCase().includes(en.name.toLowerCase())
-          );
-          return enCountry && c.id === enCountry.id;
-        });
-
-        if (localizedCountry) {
-          countryNameMap.value.set(geoName, localizedCountry.name);
+        // Map GeoJSON names to localized names based on current language
+        for (const [geoName, names] of Object.entries(lookup)) {
+          const localizedName = countriesStore.currentLanguage === 'ja' ? names.ja : names.en;
+          countryNameMap.value.set(geoName, localizedName);
         }
       }
+    } catch (error) {
+      console.warn('Failed to load country names lookup:', error);
     }
 
     isLoaded.value = true;
@@ -42,10 +32,25 @@ export function useCountryNameMap() {
     return countryNameMap.value.get(englishName) || englishName;
   };
 
+  // Get the English name from a GeoJSON name
+  const getEnglishName = async (geoJsonName: string): Promise<string> => {
+    try {
+      const lookupResponse = await fetch('/country-names-lookup.json');
+      if (lookupResponse.ok) {
+        const lookup: Record<string, { ja: string; en: string }> = await lookupResponse.json();
+        return lookup[geoJsonName]?.en || geoJsonName;
+      }
+    } catch (error) {
+      console.warn('Failed to get English name:', error);
+    }
+    return geoJsonName;
+  };
+
   return {
     countryNameMap,
     isLoaded,
     loadCountryNameMap,
     getLocalizedName,
+    getEnglishName,
   };
 }

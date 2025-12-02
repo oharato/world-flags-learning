@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import AppButton from '../components/AppButton.vue';
 import { useTranslation } from '../composables/useTranslation';
 
@@ -34,8 +36,11 @@ const timeSeconds = computed(() => parseInt(route.query.time as string, 10) || 0
 const quizFormat = computed(() => (route.query.format as string) || 'map-to-name');
 
 const answers = ref<AnswerRecord[]>([]);
+const geoJsonData = ref<any>(null);
+const mapContainers = ref<(HTMLDivElement | null)[]>([]);
+const maps = ref<L.Map[]>([]);
 
-onMounted(() => {
+onMounted(async () => {
   // Load answers from sessionStorage with validation
   const storedAnswers = sessionStorage.getItem('mapQuizAnswers');
   if (storedAnswers) {
@@ -49,7 +54,93 @@ onMounted(() => {
     }
     sessionStorage.removeItem('mapQuizAnswers');
   }
+
+  // Load GeoJSON data for maps
+  try {
+    const geoResponse = await fetch('/countries.geojson');
+    if (geoResponse.ok) {
+      geoJsonData.value = await geoResponse.json();
+
+      // Initialize maps after DOM is ready
+      await nextTick();
+      setTimeout(() => {
+        initializeMaps();
+      }, 100);
+    }
+  } catch (error) {
+    console.warn('Failed to load GeoJSON data:', error);
+  }
 });
+
+onBeforeUnmount(() => {
+  // Clean up maps
+  maps.value.forEach((map) => {
+    if (map) map.remove();
+  });
+  maps.value = [];
+});
+
+const initializeMaps = () => {
+  if (!geoJsonData.value || answers.value.length === 0) return;
+
+  answers.value.forEach((answer, index) => {
+    const container = mapContainers.value[index];
+    if (!container) return;
+
+    // Create map
+    const map = L.map(container, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+    }).setView([20, 0], 2);
+
+    // Add tile layer (no labels)
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+      subdomains: 'abcd',
+      maxZoom: 20,
+    }).addTo(map);
+
+    // Draw all country borders
+    L.geoJSON(geoJsonData.value, {
+      style: () => ({
+        color: '#888888',
+        weight: 1,
+        fillColor: 'transparent',
+        fillOpacity: 0,
+      }),
+    }).addTo(map);
+
+    // Highlight the correct country with red fill
+    const targetFeature = geoJsonData.value.features.find((f: any) => f.properties?.name === answer.correctAnswer);
+
+    if (targetFeature) {
+      L.geoJSON(targetFeature, {
+        style: () => ({
+          color: 'transparent',
+          weight: 0,
+          fillColor: '#ff6b6b',
+          fillOpacity: 0.5,
+        }),
+      }).addTo(map);
+
+      // Zoom to the country
+      const targetLayer = L.geoJSON(targetFeature);
+      const bounds = targetLayer.getBounds();
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }
+
+    maps.value[index] = map;
+  });
+};
+
+const setMapContainerRef = (el: any, index: number) => {
+  if (el) {
+    mapContainers.value[index] = el;
+  }
+};
 
 const accuracy = computed(() => {
   if (totalCount.value === 0) return 0;
@@ -70,7 +161,7 @@ const tryAgain = () => {
 </script>
 
 <template>
-  <div class="container mx-auto p-4 max-w-lg">
+  <div class="container mx-auto p-4 max-w-2xl">
     <h2 class="text-3xl font-bold my-6 text-center">{{ t.mapQuiz.resultTitle }}</h2>
 
     <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
@@ -97,41 +188,55 @@ const tryAgain = () => {
       </div>
     </div>
 
-    <!-- Answer History -->
+    <!-- Answer History with Maps -->
     <div v-if="answers.length > 0" class="bg-white rounded-lg shadow-lg p-6 mb-6">
       <h3 class="text-xl font-bold mb-4">{{ t.mapQuiz.answerHistory }}</h3>
-      <div class="space-y-3">
+      <div class="space-y-4">
         <div
           v-for="(answer, index) in answers"
           :key="index"
-          class="p-3 rounded border-l-4"
+          class="p-4 rounded-lg border-l-4"
           :class="{
             'bg-green-50 border-green-500': answer.correct,
             'bg-red-50 border-red-500': !answer.correct,
           }"
         >
-          <div class="flex items-center gap-2 mb-1">
-            <span class="font-semibold text-gray-700">{{ index + 1 }}.</span>
-            <span
-              class="text-sm px-2 py-0.5 rounded"
-              :class="{
-                'bg-green-200 text-green-800': answer.correct,
-                'bg-red-200 text-red-800': !answer.correct,
-              }"
-            >
-              {{ answer.correct ? t.mapQuiz.correctLabel : t.mapQuiz.incorrectLabel }}
-            </span>
-          </div>
-          <div class="text-sm text-gray-600">
-            <div>
-              <span class="font-medium">{{ t.mapQuiz.yourAnswer }}:</span>
-              <span :class="{ 'text-green-700': answer.correct, 'text-red-700': !answer.correct }">
-                {{ answer.selectedDisplay }}
-              </span>
-            </div>
-            <div v-if="!answer.correct">
-              <span class="font-medium">{{ t.mapQuiz.correctAnswerLabel }}:</span>
-              <span class="text-green-700">{{ answer.correctDisplay }}</span>
+          <div class="flex items-start gap-4">
+            <!-- Mini Map -->
+            <div
+              :ref="(el) => setMapContainerRef(el, index)"
+              class="w-32 h-24 rounded border border-gray-300 flex-shrink-0 bg-gray-100"
+            ></div>
+
+            <!-- Answer Details -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="font-semibold text-gray-700">{{ index + 1 }}.</span>
+                <span
+                  class="text-sm px-2 py-0.5 rounded"
+                  :class="{
+                    'bg-green-200 text-green-800': answer.correct,
+                    'bg-red-200 text-red-800': !answer.correct,
+                  }"
+                >
+                  {{ answer.correct ? t.mapQuiz.correctLabel : t.mapQuiz.incorrectLabel }}
+                </span>
+              </div>
+              <div class="text-sm text-gray-600 space-y-1">
+                <div>
+                  <span class="font-medium">{{ t.mapQuiz.yourAnswer }}:</span>
+                  <span
+                    class="ml-1"
+                    :class="{ 'text-green-700 font-semibold': answer.correct, 'text-red-700': !answer.correct }"
+                  >
+                    {{ answer.selectedDisplay }}
+                  </span>
+                </div>
+                <div v-if="!answer.correct">
+                  <span class="font-medium">{{ t.mapQuiz.correctAnswerLabel }}:</span>
+                  <span class="ml-1 text-green-700 font-semibold">{{ answer.correctDisplay }}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -149,3 +254,11 @@ const tryAgain = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+:deep(.leaflet-container) {
+  height: 100%;
+  width: 100%;
+  background: #f0f0f0;
+}
+</style>
