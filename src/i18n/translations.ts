@@ -174,6 +174,7 @@ export interface Translations {
     correct: string;
     incorrect: string;
     startMapQuiz: string;
+    loading: string;
   };
 }
 
@@ -358,6 +359,7 @@ export const translations: Record<Language, Translations> = {
       correct: '正解！',
       incorrect: '残念...正解は',
       startMapQuiz: '地図クイズに挑戦',
+      loading: '地図データを読み込み中...',
     },
   },
   en: {
@@ -540,6 +542,7 @@ export const translations: Record<Language, Translations> = {
       correct: 'Correct!',
       incorrect: 'Wrong... The correct answer is',
       startMapQuiz: 'Try Map Quiz',
+      loading: 'Loading map data...',
     },
   },
 };

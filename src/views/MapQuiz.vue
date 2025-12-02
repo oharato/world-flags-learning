@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTranslation } from '../composables/useTranslation';
@@ -31,6 +31,15 @@ onMounted(async () => {
   await loadGeoJsonData();
   initializeMap();
   generateQuiz();
+});
+
+// Cleanup map instance on component unmount to prevent memory leaks
+onBeforeUnmount(() => {
+  if (map.value) {
+    map.value.remove();
+    map.value = null;
+  }
+  geoJsonLayer.value = null;
 });
 
 const loadGeoJsonData = async () => {
@@ -212,7 +221,7 @@ watch(selectedCountryName, handleOptionChange);
     <div v-if="isDataLoading" class="flex-1 flex items-center justify-center">
       <div class="text-center">
         <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-        <p>{{ t.ranking.loading }}</p>
+        <p>{{ t.mapQuiz.loading }}</p>
       </div>
     </div>
 
