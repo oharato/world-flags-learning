@@ -16,7 +16,8 @@ const loadError = ref<string | null>(null);
 const geoJsonData = ref<any>(null);
 const geoJsonCountryNames = ref<string[]>([]);
 
-const mapContainer = ref<HTMLDivElement | null>(null);
+const mapContainerFront = ref<HTMLDivElement | null>(null);
+const mapContainerBack = ref<HTMLDivElement | null>(null);
 const map = ref<any>(null);
 
 onMounted(async () => {
@@ -70,12 +71,22 @@ watch(currentIndex, () => {
 
 watch(studyMode, () => {
   isFlipped.value = false;
+  // Reinitialize map when mode changes
+  if (map.value) {
+    map.value.remove();
+    map.value = null;
+  }
+  setTimeout(() => {
+    initMap();
+  }, 100);
 });
 
 const initMap = () => {
-  if (!mapContainer.value) return;
+  // Use the appropriate container based on study mode
+  const container = studyMode.value === 'map-to-name' ? mapContainerFront.value : mapContainerBack.value;
+  if (!container) return;
 
-  map.value = L.map(mapContainer.value, {
+  map.value = L.map(container, {
     zoomControl: true,
     attributionControl: true,
   }).setView([20, 0], 2);
@@ -254,7 +265,7 @@ const goToCountry = (index: number) => {
             <!-- Card Front -->
             <div class="absolute w-full h-full backface-hidden border-2 border-gray-300 rounded-lg shadow-lg bg-gray-100 overflow-hidden">
               <!-- Map to Name: show map on front -->
-              <div v-if="studyMode === 'map-to-name'" ref="mapContainer" class="w-full h-full"></div>
+              <div v-if="studyMode === 'map-to-name'" ref="mapContainerFront" class="w-full h-full"></div>
               <!-- Name to Map: show name on front -->
               <div v-else class="w-full h-full flex items-center justify-center">
                 <h3 class="text-4xl font-bold text-center px-4">{{ currentCountryName }}</h3>
@@ -268,7 +279,7 @@ const goToCountry = (index: number) => {
                 <h3 class="text-4xl font-bold text-center px-4">{{ currentCountryName }}</h3>
               </div>
               <!-- Name to Map: show map on back -->
-              <div v-else ref="mapContainer" class="w-full h-full"></div>
+              <div v-else ref="mapContainerBack" class="w-full h-full"></div>
             </div>
           </div>
         </div>
