@@ -4,11 +4,13 @@ import { useRoute, useRouter } from 'vue-router';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTranslation } from '../composables/useTranslation';
+import { useCountryNameMap } from '../composables/useCountryNameMap';
 import AppButton from '../components/AppButton.vue';
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useTranslation();
+const { loadCountryNameMap, getLocalizedName } = useCountryNameMap();
 
 // Quiz settings from query params
 const quizFormat = computed(() => (route.query.format as string) || 'map-to-name');
@@ -24,7 +26,9 @@ const geoJsonCountryNames = ref<string[]>([]);
 const currentQuestionIndex = ref(0);
 const questions = ref<any[]>([]);
 const selectedAnswer = ref<string>('');
-const answers = ref<{ correct: boolean; selected: string; correctAnswer: string }[]>([]);
+const answers = ref<
+  { correct: boolean; selected: string; correctAnswer: string; selectedDisplay: string; correctDisplay: string }[]
+>([]);
 const startTime = ref(0);
 const elapsedTime = ref(0);
 let timer: number;
@@ -39,16 +43,20 @@ const mainMap = ref<any>(null);
 
 onMounted(async () => {
   try {
-    const response = await fetch('/countries.geojson');
-    if (!response.ok) {
+    // Load GeoJSON data
+    const geoResponse = await fetch('/countries.geojson');
+    if (!geoResponse.ok) {
       throw new Error('Failed to load GeoJSON data');
     }
-    const data = await response.json();
+    const data = await geoResponse.json();
     geoJsonData.value = data;
 
     geoJsonCountryNames.value = data.features
       .map((f: any) => f.properties?.name)
       .filter((name: string | undefined): name is string => !!name);
+
+    // Load localized country names
+    await loadCountryNameMap(geoJsonCountryNames.value);
 
     generateQuestions();
     isLoading.value = false;
@@ -227,6 +235,8 @@ const submitAnswer = () => {
     correct: selectedAnswer.value === currentQuestion.value.correctAnswer,
     selected: selectedAnswer.value,
     correctAnswer: currentQuestion.value.correctAnswer,
+    selectedDisplay: getLocalizedName(selectedAnswer.value),
+    correctDisplay: getLocalizedName(currentQuestion.value.correctAnswer),
   });
 
   if (currentQuestionIndex.value < questions.value.length - 1) {
@@ -243,6 +253,8 @@ const submitAnswer = () => {
   } else {
     // Quiz finished
     clearInterval(timer);
+    // Store answers in sessionStorage to pass to result page
+    sessionStorage.setItem('mapQuizAnswers', JSON.stringify(answers.value));
     router.push({
       path: '/map-quiz/result',
       query: {
@@ -309,7 +321,7 @@ const setMapContainerRef = (el: any, index: number) => {
               'border-gray-300 hover:bg-gray-50': selectedAnswer !== option,
             }"
           >
-            {{ option }}
+            {{ getLocalizedName(option) }}
           </button>
         </div>
       </div>
@@ -317,7 +329,7 @@ const setMapContainerRef = (el: any, index: number) => {
       <!-- Name to Map Mode -->
       <div v-else>
         <div class="text-center mb-4 p-6 bg-gray-100 rounded-lg">
-          <h3 class="text-3xl font-bold">{{ currentQuestion.correctAnswer }}</h3>
+          <h3 class="text-3xl font-bold">{{ getLocalizedName(currentQuestion.correctAnswer) }}</h3>
         </div>
 
         <h3 class="text-xl font-semibold mb-4 text-center">{{ t.mapQuiz.selectCorrectMap }}</h3>

@@ -3,8 +3,10 @@ import { computed, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from 'v
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useTranslation } from '../composables/useTranslation';
+import { useCountryNameMap } from '../composables/useCountryNameMap';
 
 const { t } = useTranslation();
+const { loadCountryNameMap, getLocalizedName } = useCountryNameMap();
 
 const currentIndex = ref(0);
 const isFlipped = ref(false);
@@ -34,6 +36,9 @@ onMounted(async () => {
       .filter((name: string | undefined): name is string => !!name)
       .sort();
 
+    // Load localized country names
+    await loadCountryNameMap(geoJsonCountryNames.value);
+
     isLoading.value = false;
 
     setTimeout(() => {
@@ -61,6 +66,11 @@ onBeforeUnmount(() => {
 const currentCountryName = computed(() => {
   if (geoJsonCountryNames.value.length === 0) return null;
   return geoJsonCountryNames.value[currentIndex.value];
+});
+
+const currentLocalizedName = computed(() => {
+  if (!currentCountryName.value) return null;
+  return getLocalizedName(currentCountryName.value);
 });
 
 watch(currentIndex, () => {
@@ -108,9 +118,10 @@ const initMap = () => {
       fillOpacity: 0,
     }),
     onEachFeature: (feature: any, layer: any) => {
-      // Add tooltip for all countries in study mode
+      // Add tooltip for all countries in study mode (with localized name)
       if (feature.properties?.name) {
-        layer.bindTooltip(feature.properties.name, {
+        const localizedName = getLocalizedName(feature.properties.name);
+        layer.bindTooltip(localizedName, {
           permanent: false,
           sticky: true,
         });
@@ -268,7 +279,7 @@ const goToCountry = (index: number) => {
               <div v-if="studyMode === 'map-to-name'" ref="mapContainerFront" class="w-full h-full"></div>
               <!-- Name to Map: show name on front -->
               <div v-else class="w-full h-full flex items-center justify-center">
-                <h3 class="text-4xl font-bold text-center px-4">{{ currentCountryName }}</h3>
+                <h3 class="text-4xl font-bold text-center px-4">{{ currentLocalizedName }}</h3>
               </div>
             </div>
 
@@ -276,7 +287,7 @@ const goToCountry = (index: number) => {
             <div class="absolute w-full h-full backface-hidden rotate-y-180 border-2 border-gray-300 rounded-lg shadow-lg bg-gray-100 overflow-hidden">
               <!-- Map to Name: show name on back -->
               <div v-if="studyMode === 'map-to-name'" class="w-full h-full flex items-center justify-center">
-                <h3 class="text-4xl font-bold text-center px-4">{{ currentCountryName }}</h3>
+                <h3 class="text-4xl font-bold text-center px-4">{{ currentLocalizedName }}</h3>
               </div>
               <!-- Name to Map: show map on back -->
               <div v-else ref="mapContainerBack" class="w-full h-full"></div>
@@ -322,7 +333,7 @@ const goToCountry = (index: number) => {
             class="cursor-pointer rounded overflow-hidden hover:shadow-lg transition-shadow bg-gray-100 flex items-center justify-center p-2 box-border"
           >
             <span class="text-xs sm:text-sm font-medium text-center">
-              {{ countryName }}
+              {{ getLocalizedName(countryName) }}
             </span>
           </div>
         </div>

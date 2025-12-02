@@ -186,6 +186,11 @@ export interface Translations {
     tryAgain: string;
     studyTitle: string;
     startMapStudy: string;
+    answerHistory: string;
+    correctLabel: string;
+    incorrectLabel: string;
+    yourAnswer: string;
+    correctAnswerLabel: string;
   };
 }
 
@@ -382,6 +387,11 @@ export const translations: Record<Language, Translations> = {
       tryAgain: 'もう一度挑戦する',
       studyTitle: '地図で国を学習',
       startMapStudy: '地図で学習する',
+      answerHistory: '回答履歴',
+      correctLabel: '正解',
+      incorrectLabel: '不正解',
+      yourAnswer: 'あなたの回答',
+      correctAnswerLabel: '正解',
     },
   },
   en: {
@@ -576,6 +586,11 @@ export const translations: Record<Language, Translations> = {
       tryAgain: 'Try Again',
       studyTitle: 'Study Countries with Maps',
       startMapStudy: 'Study with Maps',
+      answerHistory: 'Answer History',
+      correctLabel: 'Correct',
+      incorrectLabel: 'Incorrect',
+      yourAnswer: 'Your Answer',
+      correctAnswerLabel: 'Correct Answer',
     },
   },
 };
