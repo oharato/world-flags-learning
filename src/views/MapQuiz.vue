@@ -70,9 +70,12 @@ const initializeMap = () => {
   // Initialize the map with world view
   map.value = L.map(mapContainer.value).setView([20, 0], 2);
 
-  // Add OpenStreetMap tile layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors',
+  // Use CartoDB Positron (no labels) for a clean map without country names
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    subdomains: 'abcd',
+    maxZoom: 20,
   }).addTo(map.value);
 };
 
@@ -172,7 +175,8 @@ const focusOnCountry = (countryName: string) => {
     // Create a temporary GeoJSON layer for the target country to get bounds
     const targetLayer = L.geoJSON(targetFeature);
     const bounds = targetLayer.getBounds();
-    map.value.fitBounds(bounds, { padding: [50, 50] });
+    // Use larger padding to show surrounding countries
+    map.value.fitBounds(bounds, { padding: [100, 100] });
   }
 };
 
