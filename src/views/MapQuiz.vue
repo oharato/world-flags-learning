@@ -12,6 +12,7 @@ const mapContainer = ref<HTMLDivElement | null>(null);
 // Use 'any' for Leaflet map to avoid complex type issues with the library
 const map = ref<any>(null);
 const geoJsonLayer = ref<any>(null);
+const bordersLayer = ref<any>(null);
 const geoJsonData = ref<any>(null);
 const selectedCountryName = ref<string>('');
 const isDataLoading = ref(true);
@@ -40,6 +41,7 @@ onBeforeUnmount(() => {
     map.value = null;
   }
   geoJsonLayer.value = null;
+  bordersLayer.value = null;
 });
 
 const loadGeoJsonData = async () => {
@@ -70,13 +72,24 @@ const initializeMap = () => {
   // Initialize the map with world view
   map.value = L.map(mapContainer.value).setView([20, 0], 2);
 
-  // Use CartoDB Positron (no labels) for a clean map without country names
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+  // Use Stadia Alidade Smooth (no labels) - shows only land/water with no state boundaries
+  L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
     attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: 'abcd',
+      '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
     maxZoom: 20,
   }).addTo(map.value);
+
+  // Draw all country borders from GeoJSON with darker lines (no state boundaries)
+  if (geoJsonData.value) {
+    bordersLayer.value = L.geoJSON(geoJsonData.value, {
+      style: () => ({
+        color: '#888888',
+        weight: 1.5,
+        fillColor: 'transparent',
+        fillOpacity: 0,
+      }),
+    }).addTo(map.value);
+  }
 };
 
 const generateQuiz = () => {
