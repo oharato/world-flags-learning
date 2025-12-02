@@ -4,6 +4,7 @@ import { useCountriesStore } from '../store/countries';
 export function useCountryNameMap() {
   const countriesStore = useCountriesStore();
   const countryNameMap = ref<Map<string, string>>(new Map());
+  const lookupData = ref<Record<string, { ja: string; en: string }> | null>(null);
   const isLoaded = ref(false);
 
   const loadCountryNameMap = async (_geoJsonCountryNames: string[]) => {
@@ -13,10 +14,10 @@ export function useCountryNameMap() {
       // Load the pre-generated country name lookup
       const lookupResponse = await fetch('/country-names-lookup.json');
       if (lookupResponse.ok) {
-        const lookup: Record<string, { ja: string; en: string }> = await lookupResponse.json();
+        lookupData.value = await lookupResponse.json();
 
         // Map GeoJSON names to localized names based on current language
-        for (const [geoName, names] of Object.entries(lookup)) {
+        for (const [geoName, names] of Object.entries(lookupData.value!)) {
           const localizedName = countriesStore.currentLanguage === 'ja' ? names.ja : names.en;
           countryNameMap.value.set(geoName, localizedName);
         }
@@ -32,16 +33,10 @@ export function useCountryNameMap() {
     return countryNameMap.value.get(englishName) || englishName;
   };
 
-  // Get the English name from a GeoJSON name
-  const getEnglishName = async (geoJsonName: string): Promise<string> => {
-    try {
-      const lookupResponse = await fetch('/country-names-lookup.json');
-      if (lookupResponse.ok) {
-        const lookup: Record<string, { ja: string; en: string }> = await lookupResponse.json();
-        return lookup[geoJsonName]?.en || geoJsonName;
-      }
-    } catch (error) {
-      console.warn('Failed to get English name:', error);
+  // Get the English name from a GeoJSON name (uses cached data if available)
+  const getEnglishName = (geoJsonName: string): string => {
+    if (lookupData.value) {
+      return lookupData.value[geoJsonName]?.en || geoJsonName;
     }
     return geoJsonName;
   };
