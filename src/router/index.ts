@@ -34,8 +34,23 @@ const routes = [
   },
   {
     path: '/map-quiz',
-    name: 'MapQuiz',
-    component: () => import('../views/MapQuiz.vue'),
+    name: 'MapQuizSetup',
+    component: () => import('../views/MapQuizSetup.vue'),
+  },
+  {
+    path: '/map-quiz/play',
+    name: 'MapQuizPlay',
+    component: () => import('../views/MapQuizPlay.vue'),
+  },
+  {
+    path: '/map-quiz/result',
+    name: 'MapQuizResult',
+    component: () => import('../views/MapQuizResult.vue'),
+  },
+  {
+    path: '/map-study',
+    name: 'MapStudy',
+    component: () => import('../views/MapStudy.vue'),
   },
   {
     path: '/contact',

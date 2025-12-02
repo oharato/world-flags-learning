@@ -20,6 +20,7 @@ describe('Home.vue', () => {
         { path: '/ranking', component: { template: '<div>Ranking</div>' } },
         { path: '/contact', component: { template: '<div>Contact</div>' } },
         { path: '/map-quiz', component: { template: '<div>MapQuiz</div>' } },
+        { path: '/map-study', component: { template: '<div>MapStudy</div>' } },
       ],
     });
 
@@ -154,9 +155,10 @@ describe('Home.vue', () => {
         link.props('to') === '/quiz' ||
         link.props('to') === '/study' ||
         link.props('to') === '/ranking' ||
-        link.props('to') === '/map-quiz'
+        link.props('to') === '/map-quiz' ||
+        link.props('to') === '/map-study'
     );
 
-    expect(navLinks).toHaveLength(4);
+    expect(navLinks).toHaveLength(5);
   });
 });

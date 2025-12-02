@@ -175,6 +175,17 @@ export interface Translations {
     incorrect: string;
     startMapQuiz: string;
     loading: string;
+    setupTitle: string;
+    quizFormat: string;
+    mapToName: string;
+    nameToMap: string;
+    selectCountryName: string;
+    selectCorrectMap: string;
+    resultTitle: string;
+    accuracy: string;
+    tryAgain: string;
+    studyTitle: string;
+    startMapStudy: string;
   };
 }
 
@@ -360,6 +371,17 @@ export const translations: Record<Language, Translations> = {
       incorrect: '残念...正解は',
       startMapQuiz: '地図クイズに挑戦',
       loading: '地図データを読み込み中...',
+      setupTitle: '地図クイズ設定',
+      quizFormat: 'クイズ形式',
+      mapToName: '地図 → 国名',
+      nameToMap: '国名 → 地図',
+      selectCountryName: '正しい国名を選んでください',
+      selectCorrectMap: '正しい地図を選んでください',
+      resultTitle: '結果',
+      accuracy: '正答率',
+      tryAgain: 'もう一度挑戦する',
+      studyTitle: '地図で国を学習',
+      startMapStudy: '地図で学習する',
     },
   },
   en: {
@@ -543,6 +565,17 @@ export const translations: Record<Language, Translations> = {
       incorrect: 'Wrong... The correct answer is',
       startMapQuiz: 'Try Map Quiz',
       loading: 'Loading map data...',
+      setupTitle: 'Map Quiz Setup',
+      quizFormat: 'Quiz Format',
+      mapToName: 'Map → Country Name',
+      nameToMap: 'Country Name → Map',
+      selectCountryName: 'Select the correct country name',
+      selectCorrectMap: 'Select the correct map',
+      resultTitle: 'Results',
+      accuracy: 'Accuracy',
+      tryAgain: 'Try Again',
+      studyTitle: 'Study Countries with Maps',
+      startMapStudy: 'Study with Maps',
     },
   },
 };
