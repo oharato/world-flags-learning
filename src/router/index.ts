@@ -33,6 +33,11 @@ const routes = [
     component: () => import('../views/Study.vue'),
   },
   {
+    path: '/map-quiz',
+    name: 'MapQuiz',
+    component: () => import('../views/MapQuiz.vue'),
+  },
+  {
     path: '/contact',
     name: 'Contact',
     component: () => import('../views/Contact.vue'),

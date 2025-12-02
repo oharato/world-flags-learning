@@ -165,6 +165,16 @@ export interface Translations {
     privacyPolicy: string;
     contact: string;
   };
+  mapQuiz: {
+    title: string;
+    description: string;
+    question: string;
+    submit: string;
+    next: string;
+    correct: string;
+    incorrect: string;
+    startMapQuiz: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -338,6 +348,17 @@ export const translations: Record<Language, Translations> = {
       privacyPolicy: 'プライバシーポリシー',
       contact: 'お問い合わせ',
     },
+    mapQuiz: {
+      title: '世界地図クイズ',
+      description:
+        '国名を選択すると、世界地図でその国にフォーカスします。周辺の国にマウスを乗せると国名が表示されます。',
+      question: 'この国はどこでしょう？',
+      submit: '回答する',
+      next: '次の問題へ',
+      correct: '正解！',
+      incorrect: '残念...正解は',
+      startMapQuiz: '地図クイズに挑戦',
+    },
   },
   en: {
     common: {
@@ -508,6 +529,17 @@ export const translations: Record<Language, Translations> = {
     footer: {
       privacyPolicy: 'Privacy Policy',
       contact: 'Contact Us',
+    },
+    mapQuiz: {
+      title: 'World Map Quiz',
+      description:
+        'Select a country name to focus on it on the world map. Hover over neighboring countries to see their names.',
+      question: 'Which country is this?',
+      submit: 'Submit Answer',
+      next: 'Next Question',
+      correct: 'Correct!',
+      incorrect: 'Wrong... The correct answer is',
+      startMapQuiz: 'Try Map Quiz',
     },
   },
 };
