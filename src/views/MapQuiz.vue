@@ -119,21 +119,25 @@ const focusOnCountry = (countryName: string) => {
   }
 
   // Add GeoJSON layer with styling
+  // Use transparent borders to let the base map's smooth borders show through
+  // Only apply fill color to highlight countries
   geoJsonLayer.value = L.geoJSON(geoJsonData.value, {
     style: (feature: any) => {
       if (feature?.properties?.name === countryName) {
+        // Target country: light red fill with no border (let base map borders show)
         return {
-          color: '#ff0000',
-          weight: 3,
-          fillColor: '#ff0000',
-          fillOpacity: 0.5,
+          color: 'transparent',
+          weight: 0,
+          fillColor: '#ff6b6b',
+          fillOpacity: 0.4,
         };
       }
+      // Other countries: completely transparent (no fill, no border)
       return {
-        color: '#555',
-        weight: 1,
-        fillColor: '#ffffff',
-        fillOpacity: 0.0,
+        color: 'transparent',
+        weight: 0,
+        fillColor: 'transparent',
+        fillOpacity: 0,
       };
     },
     onEachFeature: (feature: any, layer: any) => {
@@ -146,15 +150,16 @@ const focusOnCountry = (countryName: string) => {
       }
 
       // Add hover effect for non-target countries
+      // Use only fill color (no border) to match the smooth base map borders
       layer.on({
         mouseover: (e: any) => {
           const targetLayer = e.target;
           if (feature.properties?.name !== countryName) {
             targetLayer.setStyle({
-              weight: 3,
-              color: '#666',
-              fillColor: '#999',
-              fillOpacity: 0.3,
+              weight: 0,
+              color: 'transparent',
+              fillColor: '#b8b8b8',
+              fillOpacity: 0.4,
             });
             targetLayer.bringToFront();
           }
