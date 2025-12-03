@@ -91,13 +91,18 @@ onBeforeUnmount(() => {
 });
 
 const generateQuestions = () => {
-  const shuffled = [...geoJsonCountryNames.value].sort(() => Math.random() - 0.5);
-  const questionCount = Math.min(numberOfQuestions.value, shuffled.length);
+  const allCountries = [...geoJsonCountryNames.value];
+  const shuffledForQuestions = [...allCountries].sort(() => Math.random() - 0.5);
+  const questionCount = Math.min(numberOfQuestions.value, shuffledForQuestions.length);
 
   for (let i = 0; i < questionCount; i++) {
-    const correctAnswer = shuffled[i];
-    const otherCountries = shuffled.filter((c) => c !== correctAnswer);
-    const wrongOptions = otherCountries.slice(0, 3);
+    const correctAnswer = shuffledForQuestions[i];
+    // Get other countries excluding the correct answer
+    const otherCountries = allCountries.filter((c) => c !== correctAnswer);
+    // Shuffle the other countries and pick 3 random ones for wrong options
+    const shuffledOthers = [...otherCountries].sort(() => Math.random() - 0.5);
+    const wrongOptions = shuffledOthers.slice(0, 3);
+    // Combine and shuffle all options
     const options = [...wrongOptions, correctAnswer].sort(() => Math.random() - 0.5);
 
     questions.value.push({
