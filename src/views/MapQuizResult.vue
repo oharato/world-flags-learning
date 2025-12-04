@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -36,10 +36,9 @@ const timeSeconds = computed(() => parseInt(route.query.time as string, 10) || 0
 const quizFormat = computed(() => (route.query.format as string) || 'map-to-name');
 
 const answers = ref<AnswerRecord[]>([]);
-const geoJsonData = ref<any>(null);
-const mapContainerRefs = ref<Map<number, HTMLDivElement>>(new Map());
-const maps = ref<Map<number, L.Map>>(new Map());
-const dataLoaded = ref(false);
+const geoJsonData = ref<GeoJSON.FeatureCollection | null>(null);
+const maps: L.Map[] = [];
+const mapsReady = ref(false);
 
 onMounted(async () => {
   // Load answers from sessionStorage with validation
@@ -61,13 +60,11 @@ onMounted(async () => {
     const geoResponse = await fetch('/countries.geojson');
     if (geoResponse.ok) {
       geoJsonData.value = await geoResponse.json();
-      dataLoaded.value = true;
-
-      // Initialize maps after DOM is ready
+      // Wait for DOM to be ready, then initialize maps
       await nextTick();
       setTimeout(() => {
-        initializeMaps();
-      }, 200);
+        mapsReady.value = true;
+      }, 100);
     }
   } catch (error) {
     console.warn('Failed to load GeoJSON data:', error);
@@ -76,99 +73,25 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   // Clean up maps
-  maps.value.forEach((map) => {
-    if (map) map.remove();
-  });
-  maps.value.clear();
-});
-
-const initializeMaps = () => {
-  if (!geoJsonData.value || answers.value.length === 0) return;
-
-  answers.value.forEach((answer, index) => {
-    const container = mapContainerRefs.value.get(index);
-    if (!container) {
-      console.warn(`Map container not found for index ${index}`);
-      return;
-    }
-
-    // Skip if already initialized
-    if (maps.value.has(index)) return;
-
-    try {
-      // Create map
-      const map = L.map(container, {
-        zoomControl: false,
-        attributionControl: false,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        touchZoom: false,
-      }).setView([20, 0], 2);
-
-      // Add tile layer (no labels)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        subdomains: 'abcd',
-        maxZoom: 20,
-      }).addTo(map);
-
-      // Draw all country borders
-      L.geoJSON(geoJsonData.value, {
-        style: () => ({
-          color: '#888888',
-          weight: 1,
-          fillColor: 'transparent',
-          fillOpacity: 0,
-        }),
-      }).addTo(map);
-
-      // Highlight the correct country with red fill
-      const targetFeature = geoJsonData.value.features.find((f: any) => f.properties?.name === answer.correctAnswer);
-
-      if (targetFeature) {
-        L.geoJSON(targetFeature, {
-          style: () => ({
-            color: 'transparent',
-            weight: 0,
-            fillColor: '#ff6b6b',
-            fillOpacity: 0.5,
-          }),
-        }).addTo(map);
-
-        // Zoom to the country
-        const targetLayer = L.geoJSON(targetFeature);
-        const bounds = targetLayer.getBounds();
-        map.fitBounds(bounds, { padding: [20, 20] });
+  for (const map of maps) {
+    if (map) {
+      try {
+        map.remove();
+      } catch {
+        // Ignore cleanup errors
       }
-
-      maps.value.set(index, map);
-    } catch (error) {
-      console.warn(`Failed to initialize map for index ${index}:`, error);
-    }
-  });
-};
-
-const setMapContainerRef = (el: Element | ComponentPublicInstance | null, index: number) => {
-  if (el instanceof HTMLDivElement) {
-    mapContainerRefs.value.set(index, el);
-    // If data is already loaded, try to initialize this map
-    if (dataLoaded.value && geoJsonData.value && answers.value[index]) {
-      setTimeout(() => {
-        initializeSingleMap(index);
-      }, 100);
     }
   }
-};
+  maps.length = 0;
+});
 
-const initializeSingleMap = (index: number) => {
-  if (!geoJsonData.value || !answers.value[index]) return;
+const initMap = (container: HTMLElement, countryName: string) => {
+  if (!geoJsonData.value || !container) return;
 
-  const container = mapContainerRefs.value.get(index);
-  if (!container || maps.value.has(index)) return;
+  // Check if container already has a map
+  if (container.querySelector('.leaflet-container')) return;
 
   try {
-    const answer = answers.value[index];
-
     const map = L.map(container, {
       zoomControl: false,
       attributionControl: false,
@@ -178,11 +101,15 @@ const initializeSingleMap = (index: number) => {
       touchZoom: false,
     }).setView([20, 0], 2);
 
+    maps.push(map);
+
+    // Add tile layer (no labels)
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
       subdomains: 'abcd',
       maxZoom: 20,
     }).addTo(map);
 
+    // Draw all country borders
     L.geoJSON(geoJsonData.value, {
       style: () => ({
         color: '#888888',
@@ -192,10 +119,11 @@ const initializeSingleMap = (index: number) => {
       }),
     }).addTo(map);
 
-    const targetFeature = geoJsonData.value.features.find((f: any) => f.properties?.name === answer.correctAnswer);
+    // Find and highlight the target country
+    const targetFeature = geoJsonData.value.features.find((f) => f.properties?.name === countryName);
 
     if (targetFeature) {
-      L.geoJSON(targetFeature, {
+      const highlightLayer = L.geoJSON(targetFeature, {
         style: () => ({
           color: 'transparent',
           weight: 0,
@@ -204,14 +132,19 @@ const initializeSingleMap = (index: number) => {
         }),
       }).addTo(map);
 
-      const targetLayer = L.geoJSON(targetFeature);
-      const bounds = targetLayer.getBounds();
-      map.fitBounds(bounds, { padding: [20, 20] });
+      // Zoom to the country
+      const bounds = highlightLayer.getBounds();
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [10, 10] });
+      }
     }
 
-    maps.value.set(index, map);
+    // Force map to recalculate size
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 50);
   } catch (error) {
-    console.warn(`Failed to initialize single map for index ${index}:`, error);
+    console.warn('Failed to initialize map:', error);
   }
 };
 
@@ -277,9 +210,13 @@ const tryAgain = () => {
           <div class="flex items-start gap-4">
             <!-- Mini Map -->
             <div
-              :ref="(el) => setMapContainerRef(el, index)"
+              v-if="mapsReady && geoJsonData"
+              :ref="(el) => { if (el) initMap(el as HTMLElement, answer.correctAnswer); }"
               class="w-32 h-24 rounded border border-gray-300 flex-shrink-0 bg-gray-100"
             ></div>
+            <div v-else class="w-32 h-24 rounded border border-gray-300 flex-shrink-0 bg-gray-100 flex items-center justify-center">
+              <span class="text-gray-400 text-xs">Loading...</span>
+            </div>
 
             <!-- Answer Details -->
             <div class="flex-1 min-w-0">
