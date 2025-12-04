@@ -19,9 +19,19 @@ const { t } = useTranslation();
           {{ t.home.startQuiz }}
         </AppButton>
       </router-link>
+      <router-link to="/map-quiz" class="block w-full max-w-sm mx-auto">
+        <AppButton variant="secondary" full-width>
+          {{ t.mapQuiz.startMapQuiz }}
+        </AppButton>
+      </router-link>
       <router-link to="/study" class="block w-full max-w-sm mx-auto">
         <AppButton variant="success" full-width>
           {{ t.home.study }}
+        </AppButton>
+      </router-link>
+      <router-link to="/map-study" class="block w-full max-w-sm mx-auto">
+        <AppButton variant="success" full-width>
+          {{ t.mapQuiz.startMapStudy }}
         </AppButton>
       </router-link>
       <router-link to="/ranking" class="block w-full max-w-sm mx-auto">

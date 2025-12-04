@@ -19,6 +19,8 @@ describe('Home.vue', () => {
         { path: '/study', component: { template: '<div>Study</div>' } },
         { path: '/ranking', component: { template: '<div>Ranking</div>' } },
         { path: '/contact', component: { template: '<div>Contact</div>' } },
+        { path: '/map-quiz', component: { template: '<div>MapQuiz</div>' } },
+        { path: '/map-study', component: { template: '<div>MapStudy</div>' } },
       ],
     });
 
@@ -124,6 +126,20 @@ describe('Home.vue', () => {
     expect(rankingLink).toBeDefined();
   });
 
+  it('地図クイズへのリンクが正しく表示される', async () => {
+    const wrapper = mount(Home, {
+      global: {
+        plugins: [router],
+      },
+    });
+
+    await router.isReady();
+
+    const links = wrapper.findAllComponents({ name: 'RouterLink' });
+    const mapQuizLink = links.find((link) => link.props('to') === '/map-quiz');
+    expect(mapQuizLink).toBeDefined();
+  });
+
   it('すべてのナビゲーションボタンが表示される', async () => {
     const wrapper = mount(Home, {
       global: {
@@ -135,9 +151,14 @@ describe('Home.vue', () => {
 
     const links = wrapper.findAllComponents({ name: 'RouterLink' });
     const navLinks = links.filter(
-      (link) => link.props('to') === '/quiz' || link.props('to') === '/study' || link.props('to') === '/ranking'
+      (link) =>
+        link.props('to') === '/quiz' ||
+        link.props('to') === '/study' ||
+        link.props('to') === '/ranking' ||
+        link.props('to') === '/map-quiz' ||
+        link.props('to') === '/map-study'
     );
 
-    expect(navLinks).toHaveLength(3);
+    expect(navLinks).toHaveLength(5);
   });
 });
