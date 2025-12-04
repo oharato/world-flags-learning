@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { type ComponentPublicInstance, computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -148,8 +148,8 @@ const initializeMaps = () => {
   });
 };
 
-const setMapContainerRef = (el: HTMLDivElement | null, index: number) => {
-  if (el) {
+const setMapContainerRef = (el: Element | ComponentPublicInstance | null, index: number) => {
+  if (el instanceof HTMLDivElement) {
     mapContainerRefs.value.set(index, el);
     // If data is already loaded, try to initialize this map
     if (dataLoaded.value && geoJsonData.value && answers.value[index]) {
